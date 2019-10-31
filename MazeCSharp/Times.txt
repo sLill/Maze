@@ -1,0 +1,6 @@
+2k fill singlethread - 23 seconds, 18:50
+2k path singlethread - 19 minutes 23 seconds
+4k path singlethread - 17 minutes 23 sec
+
+asynchrounous ui
+multithreading
