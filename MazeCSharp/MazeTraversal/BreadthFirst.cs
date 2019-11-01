@@ -1,16 +1,28 @@
-﻿using System;
+﻿using MazeCommon;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace Maze
+namespace MazeTraversal
 {
-    public static class Solve
+    public class BreadthFirst : TraversalType
     {
-        public static void BreadthFirst(Map map)
+        #region Member Variables..
+        #endregion Member Variables..
+
+        #region Properties..
+        #endregion Properties..
+
+        #region Constructors..
+        public BreadthFirst(Map map)
+            : base(map) { }
+        #endregion Constructors..
+
+        #region Methods..
+        protected override bool SolveSingleThreaded()
         {
             //           Breadth - First - Search(Maze m)
             //              EnQueue(m.StartNode)
@@ -29,21 +41,21 @@ namespace Maze
             Queue<MapNode> nodeQueue = new Queue<MapNode>();
 
             // Start Node
-            nodeQueue.Enqueue(map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
+            nodeQueue.Enqueue(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
 
             // End Node
-            MapNode endNode = map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            MapNode endNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
 
             MapNode currNode;
             while (nodeQueue.Count > 0)
-            { 
+            {
                 currNode = nodeQueue.Dequeue();
                 currNode.Path += ($":{currNode.Position.X.ToString()},{currNode.Position.Y.ToString()}");
                 currNode.NodeValue = 2;
 
                 if (currNode.Position == endNode.Position)
                 {
-                    return;
+                    return true;
                 }
                 else
                 {
@@ -81,18 +93,18 @@ namespace Maze
                 currNode.Path = null;
             }
 
-            return;
+            return base.SolveSingleThreaded();
         }
 
-        public static void BreadthFirstMulti(Map map)
+        protected override bool SolveMultiThreaded()
         {
             ConcurrentQueue<MapNode> nodeQueue = new ConcurrentQueue<MapNode>();
 
             // Start Node
-            nodeQueue.Enqueue(map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
+            nodeQueue.Enqueue(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
 
             // End Node
-            MapNode endNode = map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            MapNode endNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
             while (nodeQueue.Count > 0)
             {
                 Parallel.ForEach(nodeQueue, new ParallelOptions { MaxDegreeOfParallelism = Convert.ToInt32(Math.Ceiling((Environment.ProcessorCount * 0.75) * 2.0)) }, (i) =>
@@ -147,64 +159,9 @@ namespace Maze
                 });
             }
 
-            return;
+
+            return base.SolveMultiThreaded();
         }
-
-        public static void DepthFirst(Map map)
-        {
-            //   let S be a stack
-            //   S.push(v)
-            //   while S is not empty
-            //      v = S.pop()
-            //      if v is not labeled as discovered:
-            //          label v as discovered
-            //          for all edges from v to w in G.adjacentEdges(v) do
-            //              S.push(w)
-
-            Stack<MapNode> nodeStack = new Stack<MapNode>();
-
-            // Start node
-            nodeStack.Push(map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
-
-            // End node
-            MapNode endNode = map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-
-            MapNode currNode;
-            while (nodeStack.Count > 0)
-            {
-                currNode = nodeStack.Pop();
-                currNode.NodeValue = 2;
-
-                if (currNode.Position == endNode.Position)
-                {
-                    return;
-                }
-                else
-                {
-                    if (currNode.NorthNode != null && currNode.NorthNode.NodeValue == 0)
-                    {
-                        currNode.NorthNode.NodeValue = 1;
-                        nodeStack.Push(currNode.NorthNode);
-                    }
-                    if (currNode.EastNode != null && currNode.EastNode.NodeValue == 0)
-                    {
-                        currNode.EastNode.NodeValue = 1;
-                        nodeStack.Push(currNode.EastNode);
-                    }
-                    if (currNode.SouthNode != null && currNode.SouthNode.NodeValue == 0)
-                    {
-                        currNode.SouthNode.NodeValue = 1;
-                        nodeStack.Push(currNode.SouthNode);
-                    }
-                    if (currNode.WestNode != null && currNode.WestNode.NodeValue == 0)
-                    {
-                        currNode.WestNode.NodeValue = 1;
-                        nodeStack.Push(currNode.WestNode);
-                    }
-                }
-            }
-
-            return;
-        }
+        #endregion Methods..
     }
 }

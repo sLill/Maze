@@ -1,0 +1,9 @@
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\obj\Debug\MazeTraversal.csprojAssemblyReference.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\obj\Debug\MazeTraversal.csproj.CoreCompileInputs.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\bin\Debug\MazeTraversal.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\bin\Debug\MazeTraversal.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\bin\Debug\MazeCommon.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\bin\Debug\MazeCommon.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\obj\Debug\MazeTraversal.csproj.CopyComplete
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\obj\Debug\MazeTraversal.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeTraversal\obj\Debug\MazeTraversal.pdb

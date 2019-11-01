@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MazeCommon;
+using MazeTraversal;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,13 +18,18 @@ namespace Maze
 {
     public partial class MainForm : Form, IDisposable
     {
-        private static string _fileName = string.Empty;
-        private static string _algorithm = string.Empty;
-        private static Stopwatch _stopwatch;
-        private static Bitmap _imageMap;
-        private static Color[][] _imageColors;
-        private static Map _map;
+        #region Member Variables..
+        private static string _FileName = string.Empty;
+        private static Bitmap _ImageMap;
+        private static Color[][] _ImageColors;
+        private static Map _Map;
+        #endregion Member Variables..
 
+        #region Properties..
+        public string SelectedAlgorithm => cbAlgorithm.SelectedItem.ToString();
+        #endregion Properties..
+
+        #region Constructors..
         public MainForm()
         {
             InitializeComponent();
@@ -31,6 +38,9 @@ namespace Maze
             cbAlgorithm.SelectedIndex = 0;
         }
 
+        #endregion Constructors..
+
+        #region Methods..
         private void InitializeControls()
         {
             lblStatus.ForeColor = Color.Black;
@@ -41,98 +51,93 @@ namespace Maze
 
         private void ProcessNodes()
         {
-            _map = new Map(_imageColors.Length, _imageColors[0].Length);
+            _Map = new Map(_ImageColors.Length, _ImageColors[0].Length);
 
             // Populate Map
-            Parallel.For(0, _imageColors.Length, (i) =>
+            Parallel.For(0, _ImageColors.Length, (i) =>
             {
-                for (int j = 0; j < _imageColors[i].Length; j++)
+                for (int j = 0; j < _ImageColors[i].Length; j++)
                 {
-                    string position = $"{i},{j}";
+                    string Position = $"{i},{j}";
 
                     // 0 = White, -1 = Black
-                    int val = _imageColors[i][j] == Color.FromArgb(0, 0, 0) ? -1 : 0;
-                    bool isStartNode = i == 0 && val == 0;
-                    bool isEndNode = i == _imageColors.Length - 1 && val == 0;
+                    int ColorValue = _ImageColors[i][j] == Color.FromArgb(0, 0, 0) ? -1 : 0;
+                    bool IsStartNode = i == 0 && ColorValue == 0;
+                    bool IsEndNode = i == _ImageColors.Length - 1 && ColorValue == 0;
 
-                    _map.Nodes[position] = new MapNode() {
-                        Position = new Point() { X = j, Y = i },
-                        NodeValue = val,
-                        IsStartNode = isStartNode,
-                        IsEndNode = isEndNode
+                    _Map.Nodes[Position] = new MapNode()
+                    {
+                        Position = new MazeCommon.Point() { X = j, Y = i },
+                        NodeValue = ColorValue,
+                        IsStartNode = IsStartNode,
+                        IsEndNode = IsEndNode
                     };
                 }
             });
 
             // Process Map and find all nodes
-            Parallel.For(0, _imageColors.Length, (i) =>
+            Parallel.For(0, _ImageColors.Length, (i) =>
             {
-                for (int j = 0; j < _imageColors[i].Length; j++)
+                for (int j = 0; j < _ImageColors[i].Length; j++)
                 {
-                    string position = $"{i},{j}";
-                    string neighborPos = string.Empty;
+                    string Position = $"{i},{j}";
+                    string NeighborPosition = string.Empty;
 
                     // North
                     if (i != 0)
                     {
-                        neighborPos = $"{i - 1},{j}";
-                        if (_map.Nodes[neighborPos].NodeValue == 0)
+                        NeighborPosition = $"{i - 1},{j}";
+                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
                         {
-                            _map.Nodes[position].NorthNode = _map.Nodes[neighborPos];
-                            //_map.Nodes[position].ConnectedNodes++;
+                            _Map.Nodes[Position].NorthNode = _Map.Nodes[NeighborPosition];
                         }
                     }
 
                     // West
                     if (j != 0)
                     {
-                        neighborPos = $"{i},{j - 1}";
-                        if (_map.Nodes[neighborPos].NodeValue == 0)
+                        NeighborPosition = $"{i},{j - 1}";
+                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
                         {
-                            _map.Nodes[position].WestNode = _map.Nodes[neighborPos];
-                            //_map.Nodes[position].ConnectedNodes++;
+                            _Map.Nodes[Position].WestNode = _Map.Nodes[NeighborPosition];
                         }
                     }
 
                     // South
-                    if (i != _imageColors.Length - 1)
+                    if (i != _ImageColors.Length - 1)
                     {
-                        neighborPos = $"{i + 1},{j}";
-                        if (_map.Nodes[neighborPos].NodeValue == 0)
+                        NeighborPosition = $"{i + 1},{j}";
+                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
                         {
-                            _map.Nodes[position].SouthNode = _map.Nodes[neighborPos];
-                            //_map.Nodes[position].ConnectedNodes++;
+                            _Map.Nodes[Position].SouthNode = _Map.Nodes[NeighborPosition];
                         }
                     }
 
                     // East
-                    if (j != _imageColors[i].Length - 1)
+                    if (j != _ImageColors[i].Length - 1)
                     {
-                        neighborPos = $"{i},{j + 1}";
-                        if (_map.Nodes[neighborPos].NodeValue == 0)
+                        NeighborPosition = $"{i},{j + 1}";
+                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
                         {
-                            _map.Nodes[position].EastNode = _map.Nodes[neighborPos];
-                            //_map.Nodes[position].ConnectedNodes++;
+                            _Map.Nodes[Position].EastNode = _Map.Nodes[NeighborPosition];
                         }
                     }
                 }
             });
         }
 
-        private void ProcessRoute()
+        private bool Solve()
         {
-            bool useMultithreading = chkMultithreading.Checked;
+            bool MultithreadingEnabled = chkMultithreading.Checked;
 
-            switch (_algorithm)
+            TraversalType TraversalType = null;
+            switch (SelectedAlgorithm)
             {
                 case "BreadthFirst":
-                    if (useMultithreading)
-                        Solve.BreadthFirstMulti(_map);
-                    else
-                        Solve.BreadthFirst(_map);
+                    TraversalType = new BreadthFirst(_Map);
                     break;
                 case "DepthFirst":
-                    Solve.DepthFirst(_map);
+                    TraversalType = new DepthFirst(_Map);
                     break;
                 case "Astar":
                     break;
@@ -145,36 +150,38 @@ namespace Maze
                 default:
                     break;
             }
+
+            return TraversalType.Solve(MultithreadingEnabled);
         }
 
         private void ReColorMap()
         {
             if (cbOutputPath.Checked)
             {
-                MapNode endNode = _map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-                string[] positions = endNode.Path.Split(':');
+                MapNode EndNode = _Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+                string[] Positions = EndNode.Path.Split(':');
 
-                foreach (string position in positions)
+                foreach (string position in Positions)
                 {
                     if (position != string.Empty)
                     {
-                        int x = Convert.ToInt32(position.Split(',')[0]);
-                        int y = Convert.ToInt32(position.Split(',')[1]);
-                        _imageColors[y][x] = Color.Red;
+                        int X = Convert.ToInt32(position.Split(',')[0]);
+                        int Y = Convert.ToInt32(position.Split(',')[1]);
+                        _ImageColors[Y][X] = Color.Red;
                     }
                 }
             }
             else
             {
-                foreach (KeyValuePair<string, MapNode> node in _map.Nodes)
+                foreach (KeyValuePair<string, MapNode> node in _Map.Nodes)
                 {
                     if (node.Value.NodeValue == 2)
                     {
-                        string[] position = node.Key.Split(',');
-                        int x = Convert.ToInt32(position[0]);
-                        int y = Convert.ToInt32(position[1]);
+                        string[] Position = node.Key.Split(',');
+                        int X = Convert.ToInt32(Position[0]);
+                        int Y = Convert.ToInt32(Position[1]);
 
-                        _imageColors[x][y] = Color.Red;
+                        _ImageColors[X][Y] = Color.Red;
                     }
                 }
             }
@@ -182,88 +189,111 @@ namespace Maze
 
         private void SaveSolution()
         {
-            string savePath = Path.Combine(Environment.CurrentDirectory, "maze_solutions", $"{_fileName}_Solution.png");
-            //_imageMap.Save(savePath, System.Drawing.Imaging.ImageFormat.Png);
+            string SavePath = Path.Combine(Environment.CurrentDirectory, "maze_solutions", $"{_FileName}_Solution.png");
 
-            int rgbIndex = 0;
-            byte[] rgbData = new byte [_imageColors.Length * _imageColors[0].Length * 4];
-            for (int i = 0; i < _imageColors.Length; i++)
+            int RgbIndex = 0;
+            byte[] RgbData = new byte[_ImageColors.Length * _ImageColors[0].Length * 4];
+            for (int i = 0; i < _ImageColors.Length; i++)
             {
-                for (int j = 0; j < _imageColors[i].Length; j++)
+                for (int j = 0; j < _ImageColors[i].Length; j++)
                 {
-                    rgbData[rgbIndex++] = _imageColors[i][j].B;
-                    rgbData[rgbIndex++] = _imageColors[i][j].G;
-                    rgbData[rgbIndex++] = _imageColors[i][j].R;
-                    rgbData[rgbIndex++] = _imageColors[i][j].A;
+                    RgbData[RgbIndex++] = _ImageColors[i][j].B;
+                    RgbData[RgbIndex++] = _ImageColors[i][j].G;
+                    RgbData[RgbIndex++] = _ImageColors[i][j].R;
+                    RgbData[RgbIndex++] = _ImageColors[i][j].A;
                 }
             }
 
-            Bitmap bmp = new Bitmap(_imageColors[0].Length, _imageColors.Length, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            var bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bmp.PixelFormat);
-            Marshal.Copy(rgbData, 0, bitmapData.Scan0, rgbData.Length);
-            bmp.UnlockBits(bitmapData);
-            bmp.Save(savePath);
+            Bitmap ImageBitmap = new Bitmap(_ImageColors[0].Length, _ImageColors.Length, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var ImageBitmapData = ImageBitmap.LockBits(new Rectangle(0, 0, ImageBitmap.Width, ImageBitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, ImageBitmap.PixelFormat);
+            Marshal.Copy(RgbData, 0, ImageBitmapData.Scan0, RgbData.Length);
+            ImageBitmap.UnlockBits(ImageBitmapData);
+            ImageBitmap.Save(SavePath);
         }
 
-        private void btnLoad_Click(object sender, EventArgs e)
+        private void SetStatus(Status status)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            _algorithm = cbAlgorithm.SelectedItem.ToString();
+            string StatusText = string.Empty;
+            Color StatusColor = Color.Black;
 
+            switch(status)
+            {
+                case Status.LoadingImage:
+                    StatusText = "Loading image..";
+                    break;
+                case Status.InitializingNodes:
+                    StatusText = "Initializing nodes..";
+                    break;
+                case Status.Solving:
+                    StatusText = "Solving..";
+                    break;
+                case Status.Success:
+                    StatusText = "Success";
+                    StatusColor = Color.Green;
+                    break;
+                case Status.Failed:
+                    StatusText = "Failed";
+                    StatusColor = Color.Red;
+                    break;
+            }
+
+            lblStatus.ForeColor = StatusColor;
+            lblStatus.Text = StatusText;
+        }
+
+        private async void btnLoad_Click(object sender, EventArgs e)
+        {
             InitializeControls();
 
-            if (dialog.ShowDialog() == DialogResult.OK)
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                lblStatus.Text = "Loading image..";
-
-                _fileName = Path.GetFileNameWithoutExtension(dialog.FileName);
-                string filePath = Path.Combine(Environment.CurrentDirectory, dialog.FileName);
-
-                _imageMap = new Bitmap(filePath);
-
-                _imageColors = new Color[_imageMap.Width][];
-                for(int i = 0; i < _imageMap.Width; i++)
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    _imageColors[i] = new Color[_imageMap.Height];
-                    for (int j = 0; j < _imageMap.Height; j++)
+                    SetStatus(Status.LoadingImage);
+
+                    _FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                    string FilePath = Path.Combine(Environment.CurrentDirectory, openFileDialog.FileName);
+
+                    _ImageMap = new Bitmap(FilePath);
+
+                    _ImageColors = new Color[_ImageMap.Width][];
+                    for (int i = 0; i < _ImageMap.Width; i++)
                     {
-                        _imageColors[i][j] = _imageMap.GetPixel(j, i);
+                        _ImageColors[i] = new Color[_ImageMap.Height];
+                        for (int j = 0; j < _ImageMap.Height; j++)
+                        {
+                            _ImageColors[i][j] = _ImageMap.GetPixel(j, i);
+                        }
+                    }
+
+                    ThreadSafeEventTimer TraversalTimer = ThreadSafeEventTimer.StartNew();
+
+                    try
+                    {
+                        SetStatus(Status.InitializingNodes);
+                        ProcessNodes();
+
+                        lblNodeCount.Text = _Map.Nodes.Count(x => x.Value.NodeValue == 0).ToString();
+                        SetStatus(Status.Solving);
+
+                        bool SolveResult = await Task.Run(() => Solve());
+                        ReColorMap();
+                        SaveSolution();
+
+                        Status SolveResultStatus = SolveResult ? Status.Success : Status.Failed;
+                        SetStatus(SolveResultStatus);
+                    }
+                    catch (Exception ex)
+                    {
+                        SetStatus(Status.Failed);
+                    }
+                    finally
+                    {
+                        TraversalTimer.Stop();
                     }
                 }
-
-                _stopwatch = new Stopwatch();
-                _stopwatch.Start();
-
-                try
-                {
-                    lblStatus.Text = "Processing nodes..";
-                    ProcessNodes();
-
-                    lblNodeCount.Text = _map.Nodes.Count(x => x.Value.NodeValue == 0).ToString();
-
-                    lblStatus.Text = "Processing route..";
-                    ProcessRoute();
-                    ReColorMap();
-
-                    SaveSolution();
-
-                    // Update timer
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        lblTimer.Text = _stopwatch.Elapsed.ToString("mm\\:ss\\.ff");
-                    });
-
-                    lblStatus.ForeColor = Color.Green;
-                    lblStatus.Text = "Success";
-                }
-                catch (Exception ex)
-                {
-                    lblStatus.ForeColor = Color.Red;
-                    lblStatus.Text = "Failed";
-                }
-
-                _stopwatch.Stop();
             }
         }
+        #endregion Methods..
     }
 }

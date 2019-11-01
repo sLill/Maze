@@ -1,14 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2042
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maze", "Maze\Maze.csproj", "{F668B5BB-6541-4A01-8B36-30B9E5E05FF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeTraversal", "MazeTraversal\MazeTraversal.csproj", "{F47EEF25-5FEE-47E5-B9A0-737760DB8749}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MazeCommon", "MazeCommon\MazeCommon.csproj", "{B0CCFA48-C98D-4295-8758-69669C63B331}"
+EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -18,11 +19,22 @@ Global
 		{F668B5BB-6541-4A01-8B36-30B9E5E05FF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F668B5BB-6541-4A01-8B36-30B9E5E05FF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F668B5BB-6541-4A01-8B36-30B9E5E05FF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F47EEF25-5FEE-47E5-B9A0-737760DB8749}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F47EEF25-5FEE-47E5-B9A0-737760DB8749}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F47EEF25-5FEE-47E5-B9A0-737760DB8749}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F47EEF25-5FEE-47E5-B9A0-737760DB8749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0CCFA48-C98D-4295-8758-69669C63B331}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0CCFA48-C98D-4295-8758-69669C63B331}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0CCFA48-C98D-4295-8758-69669C63B331}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0CCFA48-C98D-4295-8758-69669C63B331}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2C53F83E-1A21-4438-B93D-5510DD969571}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
