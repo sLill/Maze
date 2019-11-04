@@ -1,6 +1,0 @@
-C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeCommon\bin\Debug\MazeCommon.dll
-C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeCommon\bin\Debug\MazeCommon.pdb
-C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeCommon\obj\Debug\MazeCommon.csprojAssemblyReference.cache
-C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeCommon\obj\Debug\MazeCommon.csproj.CoreCompileInputs.cache
-C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeCommon\obj\Debug\MazeCommon.dll
-C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\MazeCommon\obj\Debug\MazeCommon.pdb
