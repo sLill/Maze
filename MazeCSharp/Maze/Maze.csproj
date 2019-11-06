@@ -80,13 +80,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MazeCommon\MazeCommon.csproj">
-      <Project>{B0CCFA48-C98D-4295-8758-69669C63B331}</Project>
-      <Name>MazeCommon</Name>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{FA2B80E7-78A1-4EDA-AFB2-707D9BB3DC5C}</Project>
+      <Name>Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MazeTraversal\MazeTraversal.csproj">
-      <Project>{F47EEF25-5FEE-47E5-B9A0-737760DB8749}</Project>
-      <Name>MazeTraversal</Name>
+    <ProjectReference Include="..\Implementation\Implementation.csproj">
+      <Project>{D0075E20-B0FD-43C7-BDA2-1FCE30947DFB}</Project>
+      <Name>Implementation</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,25 +17,224 @@ namespace Common
         #endregion Member Variables..
 
         #region Properties..
+        public Bitmap Image { get; set; }
+
+        public Color[][] ImageColors { get; set; }
+
         public ConcurrentDictionary<string, MapNode> Nodes { get; set; }
+
+        public ConcurrentStack<Point> PreviewPixelBuffer = new ConcurrentStack<Point>();
         #endregion Properties..
 
         #region Constructors..
-        public Map(int width, int height)
+        public Map(Bitmap mazeImage)
         {
+            Image = mazeImage;
             Nodes = new ConcurrentDictionary<string, MapNode>();
-            Parallel.For(0, width, (i) =>
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    string position = $"{i},{j}";
-                    Nodes[position] = new MapNode() { Position = new Point() { X = i, Y = j } };
-                }
-            });
         }
         #endregion Constructors..
 
         #region Methods..
+        public Image DrawPreview()
+        {
+            // Empty the buffer
+            while (PreviewPixelBuffer.TryPop(out Point point))
+            {
+                ImageColors[point.X][point.Y] = Color.Red;
+            }
+
+            int RgbIndex = 0;
+            byte[] RgbData = new byte[ImageColors.Length * ImageColors[0].Length * 4];
+            for (int i = 0; i < ImageColors.Length; i++)
+            {
+                for (int j = 0; j < ImageColors[i].Length; j++)
+                {
+                    RgbData[RgbIndex++] = ImageColors[i][j].B;
+                    RgbData[RgbIndex++] = ImageColors[i][j].G;
+                    RgbData[RgbIndex++] = ImageColors[i][j].R;
+                    RgbData[RgbIndex++] = ImageColors[i][j].A;
+                }
+            }
+
+            Bitmap ImageCopy = new Bitmap(Image);
+            var ImageBitmapData = ImageCopy.LockBits(new Rectangle(0, 0, ImageCopy.Width, ImageCopy.Height), ImageLockMode.ReadWrite, ImageCopy.PixelFormat);
+            Marshal.Copy(RgbData, 0, ImageBitmapData.Scan0, RgbData.Length);
+            ImageCopy.UnlockBits(ImageBitmapData);
+            return ImageCopy;
+            //var bitmapData = Image.LockBits(new Rectangle(0, 0, Image.Width, Image.Height), ImageLockMode.ReadWrite, Image.PixelFormat);
+
+            //int BytesPerPixel = Bitmap.GetPixelFormatSize(Image.PixelFormat) / 8;
+            //int ByteCount = bitmapData.Stride * Image.Height;
+            //byte[] Pixels = new byte[ByteCount];
+            //IntPtr ptrFirstPixel = bitmapData.Scan0;
+            //Marshal.Copy(ptrFirstPixel, Pixels, 0, Pixels.Length);
+            //int heightInPixels = bitmapData.Height;
+            //int widthInBytes = bitmapData.Width * BytesPerPixel;
+
+            //for (int y = 0; y < heightInPixels; y++)
+            //{
+            //    int currentLine = y * bitmapData.Stride;
+            //    for (int x = 0; x < widthInBytes; x = x + BytesPerPixel)
+            //    {
+            //        int oldBlue = Pixels[currentLine + x];
+            //        int oldGreen = Pixels[currentLine + x + 1];
+            //        int oldRed = Pixels[currentLine + x + 2];
+
+            //        // calculate new pixel value
+            //        Pixels[currentLine + x] = (byte)oldBlue;
+            //        Pixels[currentLine + x + 1] = (byte)oldGreen;
+            //        Pixels[currentLine + x + 2] = (byte)oldRed;
+            //    }
+            //}
+
+            //// copy modified bytes back
+            //Marshal.Copy(Pixels, 0, ptrFirstPixel, Pixels.Length);
+            //Image.UnlockBits(bitmapData);
+        }
+
+        public void DrawSolution(bool floodFill)
+        {
+            if (!floodFill)
+            {
+                MapNode EndNode = Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+                string[] Positions = EndNode.Path.ToString().Split(':');
+
+                foreach (string position in Positions)
+                {
+                    if (position != string.Empty)
+                    {
+                        int X = Convert.ToInt32(position.Split(',')[0]);
+                        int Y = Convert.ToInt32(position.Split(',')[1]);
+                        ImageColors[Y][X] = Color.Red;
+                    }
+                }
+            }
+            else
+            {
+                foreach (KeyValuePair<string, MapNode> node in Nodes)
+                {
+                    if (node.Value.NodeValue == 2)
+                    {
+                        string[] Position = node.Key.Split(',');
+                        int X = Convert.ToInt32(Position[0]);
+                        int Y = Convert.ToInt32(Position[1]);
+                        ImageColors[X][Y] = Color.Red;
+                    }
+                }
+            }
+        }
+
+        public void ExportSolution(string fileName)
+        {
+            string SavePath = Path.Combine(Environment.CurrentDirectory, "Solutions", $"{fileName}_Solution.png");
+
+            int RgbIndex = 0;
+            byte[] RgbData = new byte[ImageColors.Length * ImageColors[0].Length * 4];
+            for (int i = 0; i < ImageColors.Length; i++)
+            {
+                for (int j = 0; j < ImageColors[i].Length; j++)
+                {
+                    RgbData[RgbIndex++] = ImageColors[i][j].B;
+                    RgbData[RgbIndex++] = ImageColors[i][j].G;
+                    RgbData[RgbIndex++] = ImageColors[i][j].R;
+                    RgbData[RgbIndex++] = ImageColors[i][j].A;
+                }
+            }
+
+            Bitmap ImageBitmap = new Bitmap(ImageColors[0].Length, ImageColors.Length, PixelFormat.Format32bppArgb);
+            var ImageBitmapData = ImageBitmap.LockBits(new Rectangle(0, 0, ImageBitmap.Width, ImageBitmap.Height), ImageLockMode.ReadWrite, ImageBitmap.PixelFormat);
+            Marshal.Copy(RgbData, 0, ImageBitmapData.Scan0, RgbData.Length);
+            ImageBitmap.UnlockBits(ImageBitmapData);
+            ImageBitmap.Save(SavePath);
+        }
+
+        public void InitializeImageColors()
+        {
+            ImageColors = new Color[Image.Width][];
+            for (int i = 0; i < Image.Width; i++)
+            {
+                ImageColors[i] = new Color[Image.Height];
+                for (int j = 0; j < Image.Height; j++)
+                {
+                    ImageColors[i][j] = Image.GetPixel(j, i);
+                }
+            }
+        }
+
+        public void InitializeNodes()
+        {
+            // Populate Map
+            Parallel.For(0, ImageColors.Length, (i) =>
+            {
+                for (int j = 0; j < ImageColors[i].Length; j++)
+                {
+                    string Position = $"{i},{j}";
+
+                    // 0 = White, -1 = Black
+                    int ColorValue = ImageColors[i][j] == Color.FromArgb(0, 0, 0) ? -1 : 0;
+                    bool IsStartNode = i == 0 && ColorValue == 0;
+                    bool IsEndNode = i == ImageColors.Length - 1 && ColorValue == 0;
+
+                    Nodes[Position] = new MapNode()
+                    {
+                        Position = new Point() { X = j, Y = i },
+                        NodeValue = ColorValue,
+                        IsStartNode = IsStartNode,
+                        IsEndNode = IsEndNode
+                    };
+                }
+            });
+
+            // Process Map and find all nodes
+            Parallel.For(0, ImageColors.Length, (i) =>
+            {
+                for (int j = 0; j < ImageColors[i].Length; j++)
+                {
+                    string Position = $"{i},{j}";
+                    string NeighborPosition = string.Empty;
+
+                        // North
+                        if (i != 0)
+                    {
+                        NeighborPosition = $"{i - 1},{j}";
+                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        {
+                            Nodes[Position].NorthNode = Nodes[NeighborPosition];
+                        }
+                    }
+
+                        // West
+                        if (j != 0)
+                    {
+                        NeighborPosition = $"{i},{j - 1}";
+                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        {
+                            Nodes[Position].WestNode = Nodes[NeighborPosition];
+                        }
+                    }
+
+                        // South
+                        if (i != ImageColors.Length - 1)
+                    {
+                        NeighborPosition = $"{i + 1},{j}";
+                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        {
+                            Nodes[Position].SouthNode = Nodes[NeighborPosition];
+                        }
+                    }
+
+                        // East
+                        if (j != ImageColors[i].Length - 1)
+                    {
+                        NeighborPosition = $"{i},{j + 1}";
+                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        {
+                            Nodes[Position].EastNode = Nodes[NeighborPosition];
+                        }
+                    }
+                }
+            });
+        }
         #endregion Methods..
     }
 }

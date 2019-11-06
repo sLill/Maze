@@ -1,5 +1,5 @@
-﻿using MazeCommon;
-using MazeTraversal;
+﻿using Common;
+using Implementation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +12,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
+using Point = Common.Point;
 
 namespace Maze
 {
@@ -20,14 +22,16 @@ namespace Maze
     {
         #region Member Variables..
         private static string _FileName = string.Empty;
-        private static Bitmap _ImageMap;
-        private static Color[][] _ImageColors;
         private static Map _Map;
+        private static ThreadSafeEventTimer _MazeTimer;
         #endregion Member Variables..
 
         #region Properties..
-        public string SelectedAlgorithm => cbAlgorithm.SelectedItem.ToString();
         #endregion Properties..
+
+        #region Delegates..
+        private delegate void OnTimerElapsed();
+        #endregion Delegates..
 
         #region Constructors..
         public MainForm()
@@ -35,12 +39,78 @@ namespace Maze
             InitializeComponent();
             InitializeControls();
 
-            cbAlgorithm.SelectedIndex = 0;
+            cmbAlgorithm.SelectedIndex = 0;
         }
 
         #endregion Constructors..
 
         #region Methods..
+        #region Event Handlers..
+        private async void btnLoad_Click(object sender, EventArgs e)
+        {
+            InitializeControls();
+
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    SetStatus(Status.LoadingImage);
+
+                    _FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                    string FilePath = Path.Combine(Environment.CurrentDirectory, openFileDialog.FileName);
+
+                    bool MultithreadingEnabled = chkMultithreading.Checked;
+                    bool FloodFill = !cbOutputPath.Checked;
+                    string SelectedAlgorithm = cmbAlgorithm.SelectedItem.ToString();
+
+                    try
+                    {
+                        _Map = new Map(new Bitmap(FilePath));
+                        pbMaze.Image = new Bitmap(_Map.Image);
+
+                        SetStatus(Status.Initializing);
+                        await Task.Run(() => _Map.InitializeImageColors()).ConfigureAwait(false);
+                        await Task.Run(() => _Map.InitializeNodes()).ConfigureAwait(false);
+
+                        _MazeTimer = ThreadSafeEventTimer.StartNew();
+                        _MazeTimer.Elapsed += Timer_Elapsed;
+
+                        SetStatus(Status.Solving);
+                        bool SolveResult = await SolveAsync(SelectedAlgorithm, MultithreadingEnabled);
+
+                        _Map.DrawSolution(FloodFill);
+                        _Map.ExportSolution(_FileName);
+
+                        Status SolveResultStatus = SolveResult ? Status.Success : Status.Failed;
+                        SetStatus(SolveResultStatus);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.StackTrace, ex.Message);
+                        SetStatus(Status.Failed);
+                    }
+                    finally
+                    {
+                        _MazeTimer.Stop();
+                    }
+                }
+            }
+        }
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Invoke(new OnTimerElapsed(() =>
+            {
+                // Timer
+                TimeSpan ElapsedTime = TimeSpan.FromMilliseconds(((ThreadSafeEventTimer)sender).ElapsedMilliseconds);
+                lblTimer.Text = ElapsedTime.ToString();
+
+                // Solution preview
+                pbMaze.Image = _Map.DrawPreview();
+            }));
+        }
+        #endregion Event Handlers..
+
         private void InitializeControls()
         {
             lblStatus.ForeColor = Color.Black;
@@ -49,89 +119,10 @@ namespace Maze
             lblNodeCount.Text = "-";
         }
 
-        private void ProcessNodes()
+        private async Task<bool> SolveAsync(string selectedAlgorithm, bool multithreadingEnabled)
         {
-            _Map = new Map(_ImageColors.Length, _ImageColors[0].Length);
-
-            // Populate Map
-            Parallel.For(0, _ImageColors.Length, (i) =>
-            {
-                for (int j = 0; j < _ImageColors[i].Length; j++)
-                {
-                    string Position = $"{i},{j}";
-
-                    // 0 = White, -1 = Black
-                    int ColorValue = _ImageColors[i][j] == Color.FromArgb(0, 0, 0) ? -1 : 0;
-                    bool IsStartNode = i == 0 && ColorValue == 0;
-                    bool IsEndNode = i == _ImageColors.Length - 1 && ColorValue == 0;
-
-                    _Map.Nodes[Position] = new MapNode()
-                    {
-                        Position = new MazeCommon.Point() { X = j, Y = i },
-                        NodeValue = ColorValue,
-                        IsStartNode = IsStartNode,
-                        IsEndNode = IsEndNode
-                    };
-                }
-            });
-
-            // Process Map and find all nodes
-            Parallel.For(0, _ImageColors.Length, (i) =>
-            {
-                for (int j = 0; j < _ImageColors[i].Length; j++)
-                {
-                    string Position = $"{i},{j}";
-                    string NeighborPosition = string.Empty;
-
-                    // North
-                    if (i != 0)
-                    {
-                        NeighborPosition = $"{i - 1},{j}";
-                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
-                        {
-                            _Map.Nodes[Position].NorthNode = _Map.Nodes[NeighborPosition];
-                        }
-                    }
-
-                    // West
-                    if (j != 0)
-                    {
-                        NeighborPosition = $"{i},{j - 1}";
-                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
-                        {
-                            _Map.Nodes[Position].WestNode = _Map.Nodes[NeighborPosition];
-                        }
-                    }
-
-                    // South
-                    if (i != _ImageColors.Length - 1)
-                    {
-                        NeighborPosition = $"{i + 1},{j}";
-                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
-                        {
-                            _Map.Nodes[Position].SouthNode = _Map.Nodes[NeighborPosition];
-                        }
-                    }
-
-                    // East
-                    if (j != _ImageColors[i].Length - 1)
-                    {
-                        NeighborPosition = $"{i},{j + 1}";
-                        if (_Map.Nodes[NeighborPosition].NodeValue == 0)
-                        {
-                            _Map.Nodes[Position].EastNode = _Map.Nodes[NeighborPosition];
-                        }
-                    }
-                }
-            });
-        }
-
-        private bool Solve()
-        {
-            bool MultithreadingEnabled = chkMultithreading.Checked;
-
             TraversalType TraversalType = null;
-            switch (SelectedAlgorithm)
+            switch (selectedAlgorithm)
             {
                 case "BreadthFirst":
                     TraversalType = new BreadthFirst(_Map);
@@ -151,148 +142,47 @@ namespace Maze
                     break;
             }
 
-            return TraversalType.Solve(MultithreadingEnabled);
-        }
-
-        private void ReColorMap()
-        {
-            if (cbOutputPath.Checked)
-            {
-                MapNode EndNode = _Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-                string[] Positions = EndNode.Path.Split(':');
-
-                foreach (string position in Positions)
-                {
-                    if (position != string.Empty)
-                    {
-                        int X = Convert.ToInt32(position.Split(',')[0]);
-                        int Y = Convert.ToInt32(position.Split(',')[1]);
-                        _ImageColors[Y][X] = Color.Red;
-                    }
-                }
-            }
-            else
-            {
-                foreach (KeyValuePair<string, MapNode> node in _Map.Nodes)
-                {
-                    if (node.Value.NodeValue == 2)
-                    {
-                        string[] Position = node.Key.Split(',');
-                        int X = Convert.ToInt32(Position[0]);
-                        int Y = Convert.ToInt32(Position[1]);
-
-                        _ImageColors[X][Y] = Color.Red;
-                    }
-                }
-            }
-        }
-
-        private void SaveSolution()
-        {
-            string SavePath = Path.Combine(Environment.CurrentDirectory, "maze_solutions", $"{_FileName}_Solution.png");
-
-            int RgbIndex = 0;
-            byte[] RgbData = new byte[_ImageColors.Length * _ImageColors[0].Length * 4];
-            for (int i = 0; i < _ImageColors.Length; i++)
-            {
-                for (int j = 0; j < _ImageColors[i].Length; j++)
-                {
-                    RgbData[RgbIndex++] = _ImageColors[i][j].B;
-                    RgbData[RgbIndex++] = _ImageColors[i][j].G;
-                    RgbData[RgbIndex++] = _ImageColors[i][j].R;
-                    RgbData[RgbIndex++] = _ImageColors[i][j].A;
-                }
-            }
-
-            Bitmap ImageBitmap = new Bitmap(_ImageColors[0].Length, _ImageColors.Length, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            var ImageBitmapData = ImageBitmap.LockBits(new Rectangle(0, 0, ImageBitmap.Width, ImageBitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, ImageBitmap.PixelFormat);
-            Marshal.Copy(RgbData, 0, ImageBitmapData.Scan0, RgbData.Length);
-            ImageBitmap.UnlockBits(ImageBitmapData);
-            ImageBitmap.Save(SavePath);
+            return await Task.Run(() => TraversalType.Solve(multithreadingEnabled));
         }
 
         private void SetStatus(Status status)
         {
-            string StatusText = string.Empty;
-            Color StatusColor = Color.Black;
-
-            switch(status)
+            Invoke(new MethodInvoker(delegate
             {
-                case Status.LoadingImage:
-                    StatusText = "Loading image..";
-                    break;
-                case Status.InitializingNodes:
-                    StatusText = "Initializing nodes..";
-                    break;
-                case Status.Solving:
-                    StatusText = "Solving..";
-                    break;
-                case Status.Success:
-                    StatusText = "Success";
-                    StatusColor = Color.Green;
-                    break;
-                case Status.Failed:
-                    StatusText = "Failed";
-                    StatusColor = Color.Red;
-                    break;
-            }
+                string StatusText = string.Empty;
+                Color StatusColor = Color.Black;
 
-            lblStatus.ForeColor = StatusColor;
-            lblStatus.Text = StatusText;
-        }
-
-        private async void btnLoad_Click(object sender, EventArgs e)
-        {
-            InitializeControls();
-
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                switch (status)
                 {
-                    SetStatus(Status.LoadingImage);
-
-                    _FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
-                    string FilePath = Path.Combine(Environment.CurrentDirectory, openFileDialog.FileName);
-
-                    _ImageMap = new Bitmap(FilePath);
-
-                    _ImageColors = new Color[_ImageMap.Width][];
-                    for (int i = 0; i < _ImageMap.Width; i++)
-                    {
-                        _ImageColors[i] = new Color[_ImageMap.Height];
-                        for (int j = 0; j < _ImageMap.Height; j++)
-                        {
-                            _ImageColors[i][j] = _ImageMap.GetPixel(j, i);
-                        }
-                    }
-
-                    ThreadSafeEventTimer TraversalTimer = ThreadSafeEventTimer.StartNew();
-
-                    try
-                    {
-                        SetStatus(Status.InitializingNodes);
-                        ProcessNodes();
-
+                    case Status.LoadingImage:
+                        StatusText = "Loading image..";
+                        break;
+                    case Status.Initializing:
+                        StatusText = "Initializing..";
+                        break;
+                    case Status.Solving:
+                        StatusText = "Solving..";
                         lblNodeCount.Text = _Map.Nodes.Count(x => x.Value.NodeValue == 0).ToString();
-                        SetStatus(Status.Solving);
-
-                        bool SolveResult = await Task.Run(() => Solve());
-                        ReColorMap();
-                        SaveSolution();
-
-                        Status SolveResultStatus = SolveResult ? Status.Success : Status.Failed;
-                        SetStatus(SolveResultStatus);
-                    }
-                    catch (Exception ex)
-                    {
-                        SetStatus(Status.Failed);
-                    }
-                    finally
-                    {
-                        TraversalTimer.Stop();
-                    }
+                        break;
+                    case Status.Success:
+                        StatusText = "Success";
+                        StatusColor = Color.Green;
+                        break;
+                    case Status.Failed:
+                        StatusText = "Failed";
+                        StatusColor = Color.Red;
+                        break;
                 }
-            }
+
+                lblTimer.ForeColor = StatusColor;
+                lblStatus.ForeColor = StatusColor;
+                lblStatus.Text = StatusText;
+
+                bool LockUI = (status == Status.Solving || status == Status.Initializing);
+                cmbAlgorithm.Enabled = !LockUI;
+                chkMultithreading.Enabled = status != Status.Solving;
+                cbOutputPath.Enabled = status != Status.Solving;
+            }));
         }
         #endregion Methods..
     }

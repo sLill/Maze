@@ -1,4 +1,6 @@
-﻿namespace Common
+﻿using System.Text;
+
+namespace Common
 {
     public class MapNode
     {
@@ -12,6 +14,8 @@
         public MapNode WestNode { get; set; }
 
         public Point Position { get; set; }
+
+        //public StringBuilder Path { get; set; }
 
         public string Path { get; set; }
 

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MazeTraversal
+namespace Implementation
 {
     public class BreadthFirst : TraversalType
     {
@@ -38,59 +38,62 @@ namespace MazeTraversal
             //                     Mark c "Examined"
             //            End procedure
 
-            Queue<MapNode> nodeQueue = new Queue<MapNode>();
+            Queue<MapNode> NodeQueue = new Queue<MapNode>();
 
             // Start Node
-            nodeQueue.Enqueue(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
+            NodeQueue.Enqueue(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
 
             // End Node
-            MapNode endNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
 
-            MapNode currNode;
-            while (nodeQueue.Count > 0)
+            MapNode CurrentNode;
+            while (NodeQueue.Count > 0)
             {
-                currNode = nodeQueue.Dequeue();
-                currNode.Path += ($":{currNode.Position.X.ToString()},{currNode.Position.Y.ToString()}");
-                currNode.NodeValue = 2;
+                CurrentNode = NodeQueue.Dequeue();
+                CurrentNode.Path += ($":{CurrentNode.Position.X.ToString()},{CurrentNode.Position.Y.ToString()}");
+                CurrentNode.NodeValue = 2;
 
-                if (currNode.Position == endNode.Position)
+                // Push to preview buffer
+                Map.PreviewPixelBuffer.Push(CurrentNode.Position);
+
+                if (CurrentNode.Position == EndNode.Position)
                 {
                     return true;
                 }
                 else
                 {
-                    if (currNode.NorthNode != null && currNode.NorthNode.NodeValue == 0)
+                    if (CurrentNode.NorthNode != null && CurrentNode.NorthNode.NodeValue == 0)
                     {
-                        currNode.NorthNode.Path = currNode.Path;
-                        currNode.NorthNode.NodeValue = 1;
+                        CurrentNode.NorthNode.Path = CurrentNode.Path;
+                        CurrentNode.NorthNode.NodeValue = 1;
 
-                        nodeQueue.Enqueue(currNode.NorthNode);
+                        NodeQueue.Enqueue(CurrentNode.NorthNode);
                     }
-                    if (currNode.EastNode != null && currNode.EastNode.NodeValue == 0)
+                    if (CurrentNode.EastNode != null && CurrentNode.EastNode.NodeValue == 0)
                     {
-                        currNode.EastNode.Path = currNode.Path;
-                        currNode.EastNode.NodeValue = 1;
+                        CurrentNode.EastNode.Path = CurrentNode.Path;
+                        CurrentNode.EastNode.NodeValue = 1;
 
-                        nodeQueue.Enqueue(currNode.EastNode);
+                        NodeQueue.Enqueue(CurrentNode.EastNode);
                     }
-                    if (currNode.SouthNode != null && currNode.SouthNode.NodeValue == 0)
+                    if (CurrentNode.SouthNode != null && CurrentNode.SouthNode.NodeValue == 0)
                     {
-                        currNode.SouthNode.Path = currNode.Path;
-                        currNode.SouthNode.NodeValue = 1;
+                        CurrentNode.SouthNode.Path = CurrentNode.Path;
+                        CurrentNode.SouthNode.NodeValue = 1;
 
-                        nodeQueue.Enqueue(currNode.SouthNode);
+                        NodeQueue.Enqueue(CurrentNode.SouthNode);
                     }
-                    if (currNode.WestNode != null && currNode.WestNode.NodeValue == 0)
+                    if (CurrentNode.WestNode != null && CurrentNode.WestNode.NodeValue == 0)
                     {
-                        currNode.WestNode.Path = currNode.Path;
-                        currNode.WestNode.NodeValue = 1;
+                        CurrentNode.WestNode.Path = CurrentNode.Path;
+                        CurrentNode.WestNode.NodeValue = 1;
 
-                        nodeQueue.Enqueue(currNode.WestNode);
+                        NodeQueue.Enqueue(CurrentNode.WestNode);
                     }
                 }
 
                 // Free resources
-                currNode.Path = null;
+                CurrentNode.Path = null;
             }
 
             return base.SolveSingleThreaded();
@@ -98,63 +101,66 @@ namespace MazeTraversal
 
         protected override bool SolveMultiThreaded()
         {
-            ConcurrentQueue<MapNode> nodeQueue = new ConcurrentQueue<MapNode>();
+            ConcurrentQueue<MapNode> NodeQueue = new ConcurrentQueue<MapNode>();
 
             // Start Node
-            nodeQueue.Enqueue(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
+            NodeQueue.Enqueue(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
 
             // End Node
-            MapNode endNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-            while (nodeQueue.Count > 0)
+            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            while (NodeQueue.Count > 0)
             {
-                Parallel.ForEach(nodeQueue, new ParallelOptions { MaxDegreeOfParallelism = Convert.ToInt32(Math.Ceiling((Environment.ProcessorCount * 0.75) * 2.0)) }, (i) =>
+                Parallel.ForEach(NodeQueue, new ParallelOptions { MaxDegreeOfParallelism = Convert.ToInt32(Math.Ceiling((Environment.ProcessorCount * 0.75) * 2.0)) }, (i) =>
                 {
-                    MapNode currNode;
-                    nodeQueue.TryDequeue(out currNode);
+                    MapNode CurrentNode;
+                    NodeQueue.TryDequeue(out CurrentNode);
 
-                    lock (currNode.NodeLock)
+                    lock (CurrentNode.NodeLock)
                     {
-                        currNode.Path += ($":{currNode.Position.X.ToString()},{currNode.Position.Y.ToString()}");
-                        currNode.NodeValue = 2;
+                        CurrentNode.Path += ($":{CurrentNode.Position.X.ToString()},{CurrentNode.Position.Y.ToString()}");
+                        CurrentNode.NodeValue = 2;
 
-                        if (currNode.Position == endNode.Position)
+                        // Push to preview buffer
+                        Map.PreviewPixelBuffer.Push(CurrentNode.Position);
+
+                        if (CurrentNode.Position == EndNode.Position)
                         {
                             return;
                         }
                         else
                         {
-                            if (currNode.NorthNode != null && currNode.NorthNode.NodeValue == 0)
+                            if (CurrentNode.NorthNode != null && CurrentNode.NorthNode.NodeValue == 0)
                             {
-                                currNode.NorthNode.Path = currNode.Path;
-                                currNode.NorthNode.NodeValue = 1;
+                                CurrentNode.NorthNode.Path = CurrentNode.Path;
+                                CurrentNode.NorthNode.NodeValue = 1;
 
-                                nodeQueue.Enqueue(currNode.NorthNode);
+                                NodeQueue.Enqueue(CurrentNode.NorthNode);
                             }
-                            if (currNode.EastNode != null && currNode.EastNode.NodeValue == 0)
+                            if (CurrentNode.EastNode != null && CurrentNode.EastNode.NodeValue == 0)
                             {
-                                currNode.EastNode.Path = currNode.Path;
-                                currNode.EastNode.NodeValue = 1;
+                                CurrentNode.EastNode.Path = CurrentNode.Path;
+                                CurrentNode.EastNode.NodeValue = 1;
 
-                                nodeQueue.Enqueue(currNode.EastNode);
+                                NodeQueue.Enqueue(CurrentNode.EastNode);
                             }
-                            if (currNode.SouthNode != null && currNode.SouthNode.NodeValue == 0)
+                            if (CurrentNode.SouthNode != null && CurrentNode.SouthNode.NodeValue == 0)
                             {
-                                currNode.SouthNode.Path = currNode.Path;
-                                currNode.SouthNode.NodeValue = 1;
+                                CurrentNode.SouthNode.Path = CurrentNode.Path;
+                                CurrentNode.SouthNode.NodeValue = 1;
 
-                                nodeQueue.Enqueue(currNode.SouthNode);
+                                NodeQueue.Enqueue(CurrentNode.SouthNode);
                             }
-                            if (currNode.WestNode != null && currNode.WestNode.NodeValue == 0)
+                            if (CurrentNode.WestNode != null && CurrentNode.WestNode.NodeValue == 0)
                             {
-                                currNode.WestNode.Path = currNode.Path;
-                                currNode.WestNode.NodeValue = 1;
+                                CurrentNode.WestNode.Path = CurrentNode.Path;
+                                CurrentNode.WestNode.NodeValue = 1;
 
-                                nodeQueue.Enqueue(currNode.WestNode);
+                                NodeQueue.Enqueue(CurrentNode.WestNode);
                             }
                         }
 
                         // Free resources
-                        currNode.Path = null;
+                        CurrentNode.Path = null;
                     }
                 });
             }

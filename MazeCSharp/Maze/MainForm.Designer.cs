@@ -30,7 +30,7 @@
         {
             this.btnLoad = new System.Windows.Forms.Button();
             this.lblStatus = new System.Windows.Forms.Label();
-            this.cbAlgorithm = new System.Windows.Forms.ComboBox();
+            this.cmbAlgorithm = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lblTimer = new System.Windows.Forms.Label();
             this.lblNodeCount = new System.Windows.Forms.Label();
@@ -38,13 +38,14 @@
             this.label2 = new System.Windows.Forms.Label();
             this.chkMultithreading = new System.Windows.Forms.CheckBox();
             this.cbOutputPath = new System.Windows.Forms.CheckBox();
+            this.pbMaze = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pbMaze)).BeginInit();
             this.SuspendLayout();
             // 
             // btnLoad
             // 
-            this.btnLoad.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLoad.Location = new System.Drawing.Point(172, 189);
+            this.btnLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnLoad.Location = new System.Drawing.Point(290, 479);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(89, 23);
             this.btnLoad.TabIndex = 0;
@@ -62,22 +63,21 @@
             this.lblStatus.Text = "lblStatus";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // cbAlgorithm
+            // cmbAlgorithm
             // 
-            this.cbAlgorithm.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbAlgorithm.FormattingEnabled = true;
-            this.cbAlgorithm.Items.AddRange(new object[] {
+            this.cmbAlgorithm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbAlgorithm.FormattingEnabled = true;
+            this.cmbAlgorithm.Items.AddRange(new object[] {
             "BreadthFirst",
             "DepthFirst",
             "Astar",
             "Dijkstra",
             "FibonacciHeap",
             "LeftTurn"});
-            this.cbAlgorithm.Location = new System.Drawing.Point(12, 189);
-            this.cbAlgorithm.Name = "cbAlgorithm";
-            this.cbAlgorithm.Size = new System.Drawing.Size(152, 21);
-            this.cbAlgorithm.TabIndex = 2;
+            this.cmbAlgorithm.Location = new System.Drawing.Point(130, 479);
+            this.cmbAlgorithm.Name = "cmbAlgorithm";
+            this.cmbAlgorithm.Size = new System.Drawing.Size(152, 21);
+            this.cmbAlgorithm.TabIndex = 2;
             // 
             // label1
             // 
@@ -126,35 +126,48 @@
             // 
             // chkMultithreading
             // 
-            this.chkMultithreading.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkMultithreading.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.chkMultithreading.AutoSize = true;
-            this.chkMultithreading.Location = new System.Drawing.Point(12, 141);
+            this.chkMultithreading.Location = new System.Drawing.Point(130, 431);
             this.chkMultithreading.Name = "chkMultithreading";
-            this.chkMultithreading.Size = new System.Drawing.Size(99, 17);
+            this.chkMultithreading.Size = new System.Drawing.Size(85, 17);
             this.chkMultithreading.TabIndex = 8;
-            this.chkMultithreading.Text = "Multi-Threading";
+            this.chkMultithreading.Text = "Multi-Thread";
             this.chkMultithreading.UseVisualStyleBackColor = true;
             // 
             // cbOutputPath
             // 
-            this.cbOutputPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbOutputPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cbOutputPath.AutoSize = true;
             this.cbOutputPath.Checked = true;
             this.cbOutputPath.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbOutputPath.Location = new System.Drawing.Point(12, 164);
+            this.cbOutputPath.Location = new System.Drawing.Point(130, 454);
             this.cbOutputPath.Name = "cbOutputPath";
             this.cbOutputPath.Size = new System.Drawing.Size(140, 17);
             this.cbOutputPath.TabIndex = 9;
             this.cbOutputPath.Text = "Output path (vs flood-fill)";
             this.cbOutputPath.UseVisualStyleBackColor = true;
             // 
+            // pbMaze
+            // 
+            this.pbMaze.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbMaze.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pbMaze.Location = new System.Drawing.Point(12, 102);
+            this.pbMaze.Name = "pbMaze";
+            this.pbMaze.Size = new System.Drawing.Size(369, 304);
+            this.pbMaze.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbMaze.TabIndex = 10;
+            this.pbMaze.TabStop = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(278, 224);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(396, 514);
+            this.Controls.Add(this.pbMaze);
             this.Controls.Add(this.cbOutputPath);
             this.Controls.Add(this.chkMultithreading);
             this.Controls.Add(this.label2);
@@ -162,11 +175,12 @@
             this.Controls.Add(this.lblNodeCount);
             this.Controls.Add(this.lblTimer);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.cbAlgorithm);
+            this.Controls.Add(this.cmbAlgorithm);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.btnLoad);
             this.Name = "MainForm";
             this.Text = "Maze";
+            ((System.ComponentModel.ISupportInitialize)(this.pbMaze)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -175,7 +189,7 @@
         #endregion
         private System.Windows.Forms.Button btnLoad;
         private System.Windows.Forms.Label lblStatus;
-        private System.Windows.Forms.ComboBox cbAlgorithm;
+        private System.Windows.Forms.ComboBox cmbAlgorithm;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblTimer;
         private System.Windows.Forms.Label lblNodeCount;
@@ -183,6 +197,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkMultithreading;
         private System.Windows.Forms.CheckBox cbOutputPath;
+        private System.Windows.Forms.PictureBox pbMaze;
     }
 }
 

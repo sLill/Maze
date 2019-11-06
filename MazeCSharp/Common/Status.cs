@@ -3,7 +3,7 @@
     public enum Status
     {
         LoadingImage,
-        InitializingNodes,
+        Initializing,
         Solving,
         Success,
         Failed
