@@ -60,36 +60,7 @@ namespace Common
             var ImageBitmapData = ImageCopy.LockBits(new Rectangle(0, 0, ImageCopy.Width, ImageCopy.Height), ImageLockMode.ReadWrite, ImageCopy.PixelFormat);
             Marshal.Copy(RgbData, 0, ImageBitmapData.Scan0, RgbData.Length);
             ImageCopy.UnlockBits(ImageBitmapData);
-            return ImageCopy;
-            //var bitmapData = Image.LockBits(new Rectangle(0, 0, Image.Width, Image.Height), ImageLockMode.ReadWrite, Image.PixelFormat);
-
-            //int BytesPerPixel = Bitmap.GetPixelFormatSize(Image.PixelFormat) / 8;
-            //int ByteCount = bitmapData.Stride * Image.Height;
-            //byte[] Pixels = new byte[ByteCount];
-            //IntPtr ptrFirstPixel = bitmapData.Scan0;
-            //Marshal.Copy(ptrFirstPixel, Pixels, 0, Pixels.Length);
-            //int heightInPixels = bitmapData.Height;
-            //int widthInBytes = bitmapData.Width * BytesPerPixel;
-
-            //for (int y = 0; y < heightInPixels; y++)
-            //{
-            //    int currentLine = y * bitmapData.Stride;
-            //    for (int x = 0; x < widthInBytes; x = x + BytesPerPixel)
-            //    {
-            //        int oldBlue = Pixels[currentLine + x];
-            //        int oldGreen = Pixels[currentLine + x + 1];
-            //        int oldRed = Pixels[currentLine + x + 2];
-
-            //        // calculate new pixel value
-            //        Pixels[currentLine + x] = (byte)oldBlue;
-            //        Pixels[currentLine + x + 1] = (byte)oldGreen;
-            //        Pixels[currentLine + x + 2] = (byte)oldRed;
-            //    }
-            //}
-
-            //// copy modified bytes back
-            //Marshal.Copy(Pixels, 0, ptrFirstPixel, Pixels.Length);
-            //Image.UnlockBits(bitmapData);
+            return ImageCopy;                
         }
 
         public void DrawSolution(bool floodFill)
@@ -124,9 +95,9 @@ namespace Common
             }
         }
 
-        public void ExportSolution(string fileName)
+        public void ExportSolution(string fileName, double elapsedMilliseconds)
         {
-            string SavePath = Path.Combine(Environment.CurrentDirectory, "Solutions", $"{fileName}_Solution.png");
+            string SavePath = Path.Combine(Environment.CurrentDirectory, "Solutions", $"{fileName}_Solution_{elapsedMilliseconds/100}.png");
 
             int RgbIndex = 0;
             byte[] RgbData = new byte[ImageColors.Length * ImageColors[0].Length * 4];

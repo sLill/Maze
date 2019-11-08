@@ -1,0 +1,9 @@
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\bin\Release\Implementation.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\bin\Release\Implementation.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\bin\Release\Common.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\bin\Release\Common.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\obj\Release\Implementation.csprojAssemblyReference.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\obj\Release\Implementation.csproj.CoreCompileInputs.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\obj\Release\Implementation.csproj.CopyComplete
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\obj\Release\Implementation.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Implementation\obj\Release\Implementation.pdb

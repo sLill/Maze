@@ -1,0 +1,15 @@
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Release\Maze.exe.config
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Release\Maze.exe
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Release\Maze.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Release\Common.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Release\Implementation.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Release\Common.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Release\Implementation.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.csprojAssemblyReference.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.MainForm.resources
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.Properties.Resources.resources
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.csproj.GenerateResource.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.csproj.CoreCompileInputs.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.csproj.CopyComplete
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.exe
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.pdb

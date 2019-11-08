@@ -24,6 +24,7 @@ namespace Maze
         private static string _FileName = string.Empty;
         private static Map _Map;
         private static ThreadSafeEventTimer _MazeTimer;
+        private Task<Image> _RenderPreviewTask = null;
         #endregion Member Variables..
 
         #region Properties..
@@ -65,10 +66,10 @@ namespace Maze
 
                     try
                     {
+                        SetStatus(Status.Initializing);
                         _Map = new Map(new Bitmap(FilePath));
                         pbMaze.Image = new Bitmap(_Map.Image);
 
-                        SetStatus(Status.Initializing);
                         await Task.Run(() => _Map.InitializeImageColors()).ConfigureAwait(false);
                         await Task.Run(() => _Map.InitializeNodes()).ConfigureAwait(false);
 
@@ -79,7 +80,6 @@ namespace Maze
                         bool SolveResult = await SolveAsync(SelectedAlgorithm, MultithreadingEnabled);
 
                         _Map.DrawSolution(FloodFill);
-                        _Map.ExportSolution(_FileName);
 
                         Status SolveResultStatus = SolveResult ? Status.Success : Status.Failed;
                         SetStatus(SolveResultStatus);
@@ -93,20 +93,26 @@ namespace Maze
                     {
                         _MazeTimer.Stop();
                     }
+
+                    _Map.ExportSolution(_FileName, _MazeTimer.ElapsedMilliseconds);
                 }
             }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Invoke(new OnTimerElapsed(() =>
+            Invoke(new OnTimerElapsed(async () =>
             {
                 // Timer
                 TimeSpan ElapsedTime = TimeSpan.FromMilliseconds(((ThreadSafeEventTimer)sender).ElapsedMilliseconds);
                 lblTimer.Text = ElapsedTime.ToString();
 
                 // Solution preview
-                pbMaze.Image = _Map.DrawPreview();
+                if (_RenderPreviewTask == null || _RenderPreviewTask.IsCompleted)
+                {
+                    _RenderPreviewTask = Task.Run(() => _Map.DrawPreview());
+                    pbMaze.Image = await _RenderPreviewTask;
+                }
             }));
         }
         #endregion Event Handlers..
