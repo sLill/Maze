@@ -29,47 +29,55 @@ namespace Implementation
             //          for all edges from v to w in G.adjacentEdges(v) do
             //              S.push(w)
 
-            Stack<MapNode> nodeStack = new Stack<MapNode>();
+            Stack<MapNode> NodeStack = new Stack<MapNode>();
 
             // Start node
-            nodeStack.Push(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
+            NodeStack.Push(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
 
             // End node
-            MapNode endNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
 
-            MapNode currNode;
-            while (nodeStack.Count > 0)
+            MapNode CurrentNode;
+            while (NodeStack.Count > 0)
             {
-                currNode = nodeStack.Pop();
-                currNode.NodeValue = 2;
+                CurrentNode = NodeStack.Pop();
+                CurrentNode.Path += ($":{CurrentNode.Position.X.ToString()},{CurrentNode.Position.Y.ToString()}");
+                CurrentNode.NodeValue = 2;
 
-                if (currNode.Position == endNode.Position)
+                if (CurrentNode.Position == EndNode.Position)
                 {
                     return true;
                 }
                 else
                 {
-                    if (currNode.NorthNode != null && currNode.NorthNode.NodeValue == 0)
+                    if (CurrentNode.NorthNode != null && CurrentNode.NorthNode.NodeValue == 0)
                     {
-                        currNode.NorthNode.NodeValue = 1;
-                        nodeStack.Push(currNode.NorthNode);
+                        CurrentNode.NorthNode.Path = CurrentNode.Path;
+                        CurrentNode.NorthNode.NodeValue = 1;
+                        NodeStack.Push(CurrentNode.NorthNode);
                     }
-                    if (currNode.EastNode != null && currNode.EastNode.NodeValue == 0)
+                    if (CurrentNode.EastNode != null && CurrentNode.EastNode.NodeValue == 0)
                     {
-                        currNode.EastNode.NodeValue = 1;
-                        nodeStack.Push(currNode.EastNode);
+                        CurrentNode.EastNode.Path = CurrentNode.Path;
+                        CurrentNode.EastNode.NodeValue = 1;
+                        NodeStack.Push(CurrentNode.EastNode);
                     }
-                    if (currNode.SouthNode != null && currNode.SouthNode.NodeValue == 0)
+                    if (CurrentNode.SouthNode != null && CurrentNode.SouthNode.NodeValue == 0)
                     {
-                        currNode.SouthNode.NodeValue = 1;
-                        nodeStack.Push(currNode.SouthNode);
+                        CurrentNode.SouthNode.Path = CurrentNode.Path;
+                        CurrentNode.SouthNode.NodeValue = 1;
+                        NodeStack.Push(CurrentNode.SouthNode);
                     }
-                    if (currNode.WestNode != null && currNode.WestNode.NodeValue == 0)
+                    if (CurrentNode.WestNode != null && CurrentNode.WestNode.NodeValue == 0)
                     {
-                        currNode.WestNode.NodeValue = 1;
-                        nodeStack.Push(currNode.WestNode);
+                        CurrentNode.WestNode.Path = CurrentNode.Path;
+                        CurrentNode.WestNode.NodeValue = 1;
+                        NodeStack.Push(CurrentNode.WestNode);
                     }
                 }
+
+                // Free resources
+                CurrentNode.Path = null;
             }
 
             return base.SolveSingleThreaded();

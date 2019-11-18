@@ -95,9 +95,9 @@ namespace Common
             }
         }
 
-        public void ExportSolution(string fileName, double elapsedMilliseconds)
+        public void ExportSolution(string fileName, string selectedAlgorithm, double elapsedMilliseconds)
         {
-            string SavePath = Path.Combine(Environment.CurrentDirectory, "Solutions", $"{fileName}_Solution_{elapsedMilliseconds/100}.png");
+            string SavePath = Path.Combine(Environment.CurrentDirectory, "Solutions", $"{fileName}_{selectedAlgorithm}_{elapsedMilliseconds/1000}.png");
 
             int RgbIndex = 0;
             byte[] RgbData = new byte[ImageColors.Length * ImageColors[0].Length * 4];
