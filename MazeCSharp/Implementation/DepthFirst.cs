@@ -76,7 +76,6 @@ namespace Implementation
                     }
                 }
 
-                // Free resources
                 CurrentNode.Path = null;
             }
 

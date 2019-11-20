@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common
+﻿namespace Common
 {
     public class Point
     {
@@ -13,6 +7,7 @@ namespace Common
 
         #region Properties..
         public int X { get; set; }
+
         public int Y { get; set; }
         #endregion Properties..
 

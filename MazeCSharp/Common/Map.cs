@@ -6,7 +6,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Common
@@ -20,6 +19,8 @@ namespace Common
         public Bitmap Image { get; set; }
 
         public Color[][] ImageColors { get; set; }
+
+        public Color[][] PreviewImageColors { get; set; }
 
         public ConcurrentDictionary<string, MapNode> Nodes { get; set; }
 
@@ -40,19 +41,19 @@ namespace Common
             // Empty the buffer
             while (PreviewPixelBuffer.TryPop(out Point point))
             {
-                ImageColors[point.X][point.Y] = Color.Red;
+                PreviewImageColors[point.X][point.Y] = Color.Red;
             }
 
             int RgbIndex = 0;
-            byte[] RgbData = new byte[ImageColors.Length * ImageColors[0].Length * 4];
-            for (int i = 0; i < ImageColors.Length; i++)
+            byte[] RgbData = new byte[PreviewImageColors.Length * PreviewImageColors[0].Length * 4];
+            for (int i = 0; i < PreviewImageColors.Length; i++)
             {
-                for (int j = 0; j < ImageColors[i].Length; j++)
+                for (int j = 0; j < PreviewImageColors[i].Length; j++)
                 {
-                    RgbData[RgbIndex++] = ImageColors[i][j].B;
-                    RgbData[RgbIndex++] = ImageColors[i][j].G;
-                    RgbData[RgbIndex++] = ImageColors[i][j].R;
-                    RgbData[RgbIndex++] = ImageColors[i][j].A;
+                    RgbData[RgbIndex++] = PreviewImageColors[i][j].B;
+                    RgbData[RgbIndex++] = PreviewImageColors[i][j].G;
+                    RgbData[RgbIndex++] = PreviewImageColors[i][j].R;
+                    RgbData[RgbIndex++] = PreviewImageColors[i][j].A;
                 }
             }
 
@@ -68,15 +69,18 @@ namespace Common
             if (!floodFill)
             {
                 MapNode EndNode = Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-                string[] Positions = EndNode.Path.ToString().Split(':');
 
-                foreach (string position in Positions)
+                while (EndNode.GetPathSegment(out string pathSegment))
                 {
-                    if (position != string.Empty)
+                    string[] Positions = pathSegment?.Split(':');
+                    foreach (string position in Positions)
                     {
-                        int X = Convert.ToInt32(position.Split(',')[0]);
-                        int Y = Convert.ToInt32(position.Split(',')[1]);
-                        ImageColors[Y][X] = Color.Red;
+                        if (position != string.Empty)
+                        {
+                            int X = Convert.ToInt32(position.Split(',')[0]);
+                            int Y = Convert.ToInt32(position.Split(',')[1]);
+                            ImageColors[Y][X] = Color.Red;
+                        }
                     }
                 }
             }
@@ -122,12 +126,17 @@ namespace Common
         public void InitializeImageColors()
         {
             ImageColors = new Color[Image.Width][];
+            PreviewImageColors = new Color[Image.Width][];
+
             for (int i = 0; i < Image.Width; i++)
             {
                 ImageColors[i] = new Color[Image.Height];
+                PreviewImageColors[i] = new Color[Image.Height];
+
                 for (int j = 0; j < Image.Height; j++)
                 {
                     ImageColors[i][j] = Image.GetPixel(j, i);
+                    PreviewImageColors[i][j] = Image.GetPixel(j, i);
                 }
             }
         }

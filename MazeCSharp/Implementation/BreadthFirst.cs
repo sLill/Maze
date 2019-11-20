@@ -3,7 +3,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Implementation
@@ -50,7 +49,8 @@ namespace Implementation
             while (NodeQueue.Count > 0)
             {
                 CurrentNode = NodeQueue.Dequeue();
-                CurrentNode.Path += ($":{CurrentNode.Position.X.ToString()},{CurrentNode.Position.Y.ToString()}");
+
+                CurrentNode.AppendPointToPath();
                 CurrentNode.NodeValue = 2;
 
                 // Push to preview buffer
@@ -67,6 +67,7 @@ namespace Implementation
                         CurrentNode.NorthNode.Path = CurrentNode.Path;
                         CurrentNode.NorthNode.NodeValue = 1;
 
+                        CurrentNode.NorthNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
                         NodeQueue.Enqueue(CurrentNode.NorthNode);
                     }
                     if (CurrentNode.EastNode != null && CurrentNode.EastNode.NodeValue == 0)
@@ -74,6 +75,7 @@ namespace Implementation
                         CurrentNode.EastNode.Path = CurrentNode.Path;
                         CurrentNode.EastNode.NodeValue = 1;
 
+                        CurrentNode.EastNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
                         NodeQueue.Enqueue(CurrentNode.EastNode);
                     }
                     if (CurrentNode.SouthNode != null && CurrentNode.SouthNode.NodeValue == 0)
@@ -81,6 +83,7 @@ namespace Implementation
                         CurrentNode.SouthNode.Path = CurrentNode.Path;
                         CurrentNode.SouthNode.NodeValue = 1;
 
+                        CurrentNode.SouthNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
                         NodeQueue.Enqueue(CurrentNode.SouthNode);
                     }
                     if (CurrentNode.WestNode != null && CurrentNode.WestNode.NodeValue == 0)
@@ -88,12 +91,12 @@ namespace Implementation
                         CurrentNode.WestNode.Path = CurrentNode.Path;
                         CurrentNode.WestNode.NodeValue = 1;
 
+                        CurrentNode.WestNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
                         NodeQueue.Enqueue(CurrentNode.WestNode);
                     }
                 }
 
-                // Free resources
-                CurrentNode.Path = null;
+                CurrentNode.Dispose();
             }
 
             return base.SolveSingleThreaded();
@@ -159,12 +162,10 @@ namespace Implementation
                             }
                         }
 
-                        // Free resources
                         CurrentNode.Path = null;
                     }
                 });
             }
-
 
             return base.SolveMultiThreaded();
         }
