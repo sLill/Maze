@@ -61,7 +61,7 @@ namespace Common
             var ImageBitmapData = ImageCopy.LockBits(new Rectangle(0, 0, ImageCopy.Width, ImageCopy.Height), ImageLockMode.ReadWrite, ImageCopy.PixelFormat);
             Marshal.Copy(RgbData, 0, ImageBitmapData.Scan0, RgbData.Length);
             ImageCopy.UnlockBits(ImageBitmapData);
-            return ImageCopy;                
+            return ImageCopy;
         }
 
         public void DrawSolution(bool floodFill)
@@ -73,6 +73,10 @@ namespace Common
                 while (EndNode.GetPathSegment(out string pathSegment))
                 {
                     string[] Positions = pathSegment?.Split(':');
+
+                    // Sanitize the solution path, removing any unnecessary loops or dead ends
+                    Positions = SanitizeSolutionPath(Positions);
+
                     foreach (string position in Positions)
                     {
                         if (position != string.Empty)
@@ -101,7 +105,7 @@ namespace Common
 
         public void ExportSolution(string fileName, string selectedAlgorithm, double elapsedMilliseconds)
         {
-            string SavePath = Path.Combine(Environment.CurrentDirectory, "Solutions", $"{fileName}_{selectedAlgorithm}_{elapsedMilliseconds/1000}.png");
+            string SavePath = Path.Combine(Environment.CurrentDirectory, "Solutions", $"{fileName}_{selectedAlgorithm}_{elapsedMilliseconds / 1000}.png");
 
             int RgbIndex = 0;
             byte[] RgbData = new byte[ImageColors.Length * ImageColors[0].Length * 4];
@@ -173,8 +177,8 @@ namespace Common
                     string Position = $"{i},{j}";
                     string NeighborPosition = string.Empty;
 
-                        // North
-                        if (i != 0)
+                    // North
+                    if (i != 0)
                     {
                         NeighborPosition = $"{i - 1},{j}";
                         if (Nodes[NeighborPosition].NodeValue == 0)
@@ -183,8 +187,8 @@ namespace Common
                         }
                     }
 
-                        // West
-                        if (j != 0)
+                    // West
+                    if (j != 0)
                     {
                         NeighborPosition = $"{i},{j - 1}";
                         if (Nodes[NeighborPosition].NodeValue == 0)
@@ -193,8 +197,8 @@ namespace Common
                         }
                     }
 
-                        // South
-                        if (i != ImageColors.Length - 1)
+                    // South
+                    if (i != ImageColors.Length - 1)
                     {
                         NeighborPosition = $"{i + 1},{j}";
                         if (Nodes[NeighborPosition].NodeValue == 0)
@@ -203,8 +207,8 @@ namespace Common
                         }
                     }
 
-                        // East
-                        if (j != ImageColors[i].Length - 1)
+                    // East
+                    if (j != ImageColors[i].Length - 1)
                     {
                         NeighborPosition = $"{i},{j + 1}";
                         if (Nodes[NeighborPosition].NodeValue == 0)
@@ -214,6 +218,57 @@ namespace Common
                     }
                 }
             });
+        }
+
+        private string[] SanitizeSolutionPath(string[] solutionPath)
+        {
+            List<string> Result = solutionPath.ToList();
+
+            bool Sanitized = false;
+            while (!Sanitized)
+            {
+                Sanitized = true;
+
+                foreach (string position in Result)
+                {
+                    if (position != string.Empty)
+                    {
+                        // Nodes with only 1 connection that are not the StartNode or the EndNode are dead-ends
+                        // When detected, removes that node and all connected nodes until a node with atleast 3 connections is found
+                        if (Nodes[position].ConnectedNodes.Count == 1)
+                        {
+                            var DeadEndNode = Nodes[position];
+                            List<MapNode> StaleConnectedNodes = DeadEndNode.ConnectedNodes;
+
+                            bool StalePathRemoved = false;
+                            while (!StalePathRemoved)
+                            {
+                                StalePathRemoved = true;
+
+                                foreach (var staleNode in StaleConnectedNodes)
+                                {
+                                    StaleConnectedNodes.Remove(staleNode);
+                                    Result.Remove(staleNode.Position.ToString());
+
+                                    if (staleNode.ConnectedNodes.Count < 3)
+                                    {
+                                        StaleConnectedNodes.AddRange(staleNode.ConnectedNodes.Where(x => x.Position.ToString() != position));
+                                        StalePathRemoved = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            Result.Remove(position);
+
+                            if (StalePathRemoved)
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return Result.ToArray();
         }
         #endregion Methods..
     }

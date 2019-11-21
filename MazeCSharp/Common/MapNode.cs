@@ -28,6 +28,19 @@ namespace Common
         // -1 = Wall, 0 = Path (unvisited), 1 = Path (visited), 2 = Path (visited and examined)
         public int NodeValue { get; set; }
 
+        public List<MapNode> ConnectedNodes
+        {
+            get
+            {
+                List<MapNode> Connections = new List<MapNode>();
+                if (NorthNode != null) Connections.Add(NorthNode);
+                if (EastNode != null) Connections.Add(EastNode);
+                if (SouthNode != null) Connections.Add(SouthNode);
+                if (WestNode != null) Connections.Add(WestNode);
+                return Connections;
+            }
+        }
+
         public string Path { get; set; }
         #endregion Properties..
 
