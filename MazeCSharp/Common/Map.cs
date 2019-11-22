@@ -69,22 +69,14 @@ namespace Common
             if (!floodFill)
             {
                 MapNode EndNode = Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-
-                while (EndNode.GetPathSegment(out string pathSegment))
+                foreach (var segment in EndNode.GetPathSegments())
                 {
-                    string[] Positions = pathSegment?.Split(':');
-
-                    // Sanitize the solution path, removing any unnecessary loops or dead ends
-                    Positions = SanitizeSolutionPath(Positions);
-
+                    string[] Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string position in Positions)
                     {
-                        if (position != string.Empty)
-                        {
-                            int X = Convert.ToInt32(position.Split(',')[0]);
-                            int Y = Convert.ToInt32(position.Split(',')[1]);
-                            ImageColors[Y][X] = Color.Red;
-                        }
+                        int X = Convert.ToInt32(position.Split(',')[0]);
+                        int Y = Convert.ToInt32(position.Split(',')[1]);
+                        ImageColors[Y][X] = Color.Red;
                     }
                 }
             }
@@ -220,55 +212,28 @@ namespace Common
             });
         }
 
-        private string[] SanitizeSolutionPath(string[] solutionPath)
+        public void RefreshNodeCollection()
         {
-            List<string> Result = solutionPath.ToList();
+            MapNode StartNode = Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value;
+            MapNode EndNode = Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
 
-            bool Sanitized = false;
-            while (!Sanitized)
+            Nodes.Clear();
+            Nodes[EndNode.Position.ToString()] = EndNode;
+
+            foreach (var segment in EndNode.GetPathSegments())
             {
-                Sanitized = true;
-
-                foreach (string position in Result)
+                string[] Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var position in Positions)
                 {
-                    if (position != string.Empty)
+                    Nodes[position] = new MapNode()
                     {
-                        // Nodes with only 1 connection that are not the StartNode or the EndNode are dead-ends
-                        // When detected, removes that node and all connected nodes until a node with atleast 3 connections is found
-                        if (Nodes[position].ConnectedNodes.Count == 1)
-                        {
-                            var DeadEndNode = Nodes[position];
-                            List<MapNode> StaleConnectedNodes = DeadEndNode.ConnectedNodes;
-
-                            bool StalePathRemoved = false;
-                            while (!StalePathRemoved)
-                            {
-                                StalePathRemoved = true;
-
-                                foreach (var staleNode in StaleConnectedNodes)
-                                {
-                                    StaleConnectedNodes.Remove(staleNode);
-                                    Result.Remove(staleNode.Position.ToString());
-
-                                    if (staleNode.ConnectedNodes.Count < 3)
-                                    {
-                                        StaleConnectedNodes.AddRange(staleNode.ConnectedNodes.Where(x => x.Position.ToString() != position));
-                                        StalePathRemoved = false;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            Result.Remove(position);
-
-                            if (StalePathRemoved)
-                                break;
-                        }
-                    }
+                        Position = Point.FromString(position),
+                        NodeValue = EndNode.NodeValue,
+                        IsStartNode = StartNode.Position.ToString() == position,
+                        IsEndNode = EndNode.Position.ToString() == position
+                    };
                 }
             }
-
-            return Result.ToArray();
         }
         #endregion Methods..
     }

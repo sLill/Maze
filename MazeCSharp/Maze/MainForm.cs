@@ -52,7 +52,6 @@ namespace Maze
                     _FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
                     string FilePath = Path.Combine(Environment.CurrentDirectory, openFileDialog.FileName);
 
-                    bool MultithreadingEnabled = chkMultithreading.Checked;
                     bool FloodFill = !cbOutputPath.Checked;
                     string SelectedAlgorithm = cmbAlgorithm.SelectedItem.ToString();
 
@@ -69,7 +68,7 @@ namespace Maze
                         _MazeTimer.Elapsed += Timer_Elapsed;
 
                         SetStatus(Status.Solving);
-                        bool SolveResult = await SolveAsync(SelectedAlgorithm, MultithreadingEnabled);
+                        bool SolveResult = await SolveAsync(SelectedAlgorithm);
 
                         _Map.DrawSolution(FloodFill);
 
@@ -117,7 +116,7 @@ namespace Maze
             lblNodeCount.Text = "-";
         }
 
-        private async Task<bool> SolveAsync(string selectedAlgorithm, bool multithreadingEnabled)
+        private async Task<bool> SolveAsync(string selectedAlgorithm)
         {
             TraversalType TraversalType = null;
             switch (selectedAlgorithm)
@@ -140,7 +139,7 @@ namespace Maze
                     break;
             }
 
-            return await Task.Run(() => TraversalType.Solve(multithreadingEnabled));
+            return await Task.Run(() => TraversalType.Solve());
         }
 
         private void SetStatus(Status status)
@@ -178,7 +177,6 @@ namespace Maze
 
                 bool LockUI = (status == Status.Solving || status == Status.Initializing);
                 cmbAlgorithm.Enabled = !LockUI;
-                chkMultithreading.Enabled = status != Status.Solving;
                 cbOutputPath.Enabled = status != Status.Solving;
             }));
         }

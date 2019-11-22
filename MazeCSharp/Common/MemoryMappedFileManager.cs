@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO.MemoryMappedFiles;
+using System.Linq;
 using System.Text;
 
 namespace Common
@@ -38,23 +40,21 @@ namespace Common
 
         /// <summary>
         /// Gets the file content from the next mapped file on the stack as a string.
-        /// Results null on an empty stack.
+        /// Returns null on an empty stack.
         /// </summary>
         /// <returns></returns>
-        public string GetFileContent()
+        public List<string> GetFileContent()
         {
-            string Result = null;
+            List<string> Result = new List<string>();
 
-            if (MemoryMappedFileCollection.TryPop(out MemoryMappedFile memoryMappedFile))
+            foreach (var memoryMappedFile in MemoryMappedFileCollection)
             {
                 using (var viewStream = memoryMappedFile.CreateViewStream())
                 {
                     byte[] Bytes = new byte[viewStream.Capacity];
                     viewStream.Read(Bytes, 0, Bytes.Length);
-                    Result = Encoding.UTF8.GetString(Bytes);
+                    Result.Add(Encoding.UTF8.GetString(Bytes));
                 }
-
-                memoryMappedFile.Dispose();
             }
 
             return Result;

@@ -1,4 +1,6 @@
 ﻿using Common;
+using System;
+using System.Linq;
 
 namespace Implementation
 {
@@ -19,14 +21,43 @@ namespace Implementation
         #endregion Constructors..
 
         #region Methods..
-        public bool Solve(bool multithreadingEnabled)
+        /// <summary>
+        /// Returns true if the solution path contains any nodes with more than two connections
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool CheckPathForExcursions()
         {
-            return multithreadingEnabled ? SolveMultiThreaded() : SolveSingleThreaded();
+            bool HasExcursions = false;
+
+            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            var PathSegments = EndNode.GetPathSegments();
+
+            foreach (var segment in PathSegments)
+            {
+                string[] Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                HasExcursions = HasExcursions || Positions.ToList()
+                    .Where(x => Map.Nodes[x].ConnectedNodes.Count() > 2)
+                    .Any();
+            }
+
+            return HasExcursions;
         }
 
-        protected virtual bool SolveSingleThreaded() { return true; }
+        protected virtual bool Search() { return true; }
 
-        protected virtual bool SolveMultiThreaded() { return true; }
+        public virtual bool Solve()
+        {
+            bool Solved = false;
+            while (!Solved)
+            {
+                this.Search();
+                Solved = !CheckPathForExcursions();
+
+                Map.RefreshNodeCollection();
+            }
+
+            return true;
+        }
         #endregion Methods..
     }
 }

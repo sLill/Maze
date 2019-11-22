@@ -77,20 +77,17 @@ namespace Common
         /// Returns null if none exist.
         /// </summary>
         /// <returns></returns>
-        public bool GetPathSegment(out string pathSegment)
+        public List<string> GetPathSegments()
         {
-            pathSegment = string.Empty;
+            List<string> Result = new List<string>();
+
             if (Path != string.Empty)
             {
-                pathSegment = Path;
-                Path = string.Empty;
-            }
-            else
-            {
-                pathSegment = MemoryMappedFileManager.GetFileContent() ?? string.Empty;
+                Result.Add(Path);
             }
 
-            return pathSegment != string.Empty;
+            Result.AddRange(MemoryMappedFileManager.GetFileContent());
+            return Result;
         }
         #endregion Methods..
     }

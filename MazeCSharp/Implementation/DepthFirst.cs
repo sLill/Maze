@@ -18,7 +18,7 @@ namespace Implementation
         #endregion Constructors..
 
         #region Methods..
-        protected override bool SolveSingleThreaded()
+        protected override bool Search()
         {
             //   let S be a stack
             //   S.push(v)
@@ -79,7 +79,12 @@ namespace Implementation
                 CurrentNode.Path = null;
             }
 
-            return base.SolveSingleThreaded();
+            return base.Search();
+        }
+
+        public override bool Solve()
+        {
+            return base.Solve();
         }
         #endregion Methods..
     }
