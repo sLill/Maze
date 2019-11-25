@@ -218,6 +218,8 @@ namespace Common
             MapNode EndNode = Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
 
             Nodes.Clear();
+
+            Nodes[StartNode.Position.ToString()] = StartNode;
             Nodes[EndNode.Position.ToString()] = EndNode;
 
             foreach (var segment in EndNode.GetPathSegments())

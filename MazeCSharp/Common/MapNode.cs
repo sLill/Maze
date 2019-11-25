@@ -47,6 +47,7 @@ namespace Common
         #region Constructors..
         public MapNode()
         {
+            MemoryMappedFileManager = new MemoryMappedFileManager();
             Path = string.Empty;
             NodeLock = new object();
         }
@@ -58,8 +59,6 @@ namespace Common
             // 50 Mb files
             if (Path.Length >= 50000)
             {
-                MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
-
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path);
                 Path = string.Empty;
             }
@@ -69,7 +68,7 @@ namespace Common
 
         public void Dispose()
         {
-            Path = null;
+            Path = string.Empty;
         }
 
         /// <summary>
