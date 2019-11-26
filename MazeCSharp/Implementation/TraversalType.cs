@@ -1,6 +1,7 @@
 ﻿using Common;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace Implementation
@@ -30,7 +31,26 @@ namespace Implementation
         {
             bool HasExcursions = true;
 
-            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;         
+            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            List<string> PathFull = string.Join(string.Empty, EndNode.GetPathSegments()).Split(':').ToList();
+
+            for (int i = 0; i < Map.ImageColors.Length; i++)
+            {
+                Color[] colorRow = Map.ImageColors[i];
+                for (int j = 0; j < colorRow.Length; j++)
+                {
+                    if (!PathFull.Contains($"{i},{j}"))
+                    {
+                        Map.ImageColors[i][j] = Color.FromArgb(255, 255, 255);
+                    }
+                    else
+                    {
+                        Map.ImageColors[i][j] = Color.FromArgb(0, 0, 0);
+                    }
+                }
+            }
+
+            Map.InitializeNodes();
 
             return HasExcursions;
         }

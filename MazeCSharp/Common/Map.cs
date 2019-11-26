@@ -139,7 +139,7 @@ namespace Common
 
         public void InitializeNodes()
         {
-            // Populate Map
+            // Populate map
             Parallel.For(0, ImageColors.Length, (i) =>
             {
                 for (int j = 0; j < ImageColors[i].Length; j++)
@@ -161,7 +161,7 @@ namespace Common
                 }
             });
 
-            // Process Map and find all nodes
+            // Build node relationships
             Parallel.For(0, ImageColors.Length, (i) =>
             {
                 for (int j = 0; j < ImageColors[i].Length; j++)

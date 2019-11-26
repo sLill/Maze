@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.MemoryMappedFiles;
 
 namespace Common
 {
@@ -22,8 +21,6 @@ namespace Common
         public bool IsStartNode { get; set; }
 
         public MemoryMappedFileManager MemoryMappedFileManager { get; set; }
-
-        public object NodeLock { get; set; }
 
         // -1 = Wall, 0 = Path (unvisited), 1 = Path (visited), 2 = Path (visited and examined)
         public int NodeValue { get; set; }
@@ -48,7 +45,6 @@ namespace Common
         public MapNode()
         {
             Path = string.Empty;
-            NodeLock = new object();
         }
         #endregion Constructors..
 

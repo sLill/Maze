@@ -100,7 +100,6 @@ namespace Implementation
 
                     CurrentNode.Dispose();
                 }
-
             }
 
             return base.Search();
