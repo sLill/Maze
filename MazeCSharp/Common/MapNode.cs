@@ -47,7 +47,6 @@ namespace Common
         #region Constructors..
         public MapNode()
         {
-            MemoryMappedFileManager = new MemoryMappedFileManager();
             Path = string.Empty;
             NodeLock = new object();
         }
@@ -59,11 +58,12 @@ namespace Common
             // 50 Mb files
             if (Path.Length >= 50000)
             {
+                MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path);
                 Path = string.Empty;
             }
 
-            Path += $":{this.Position.X.ToString()},{this.Position.Y.ToString()}";
+            Path += $":{this.Position.ToString()}";
         }
 
         public void Dispose()
@@ -85,7 +85,11 @@ namespace Common
                 Result.Add(Path);
             }
 
-            Result.AddRange(MemoryMappedFileManager.GetFileContent());
+            if (MemoryMappedFileManager != null)
+            {
+                Result.AddRange(MemoryMappedFileManager.GetFileContent());
+            }
+
             return Result;
         }
         #endregion Methods..

@@ -85,6 +85,7 @@ namespace Maze
                         _MazeTimer.Stop();
                     }
 
+                    Timer_Elapsed(_MazeTimer, null);
                     _Map.ExportSolution(_FileName, SelectedAlgorithm, _MazeTimer.ElapsedMilliseconds);
                 }
             }

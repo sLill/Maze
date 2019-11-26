@@ -1,5 +1,6 @@
 ﻿using Common;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Implementation
@@ -25,7 +26,7 @@ namespace Implementation
         /// Returns true if the solution path contains any nodes with more than two connections
         /// </summary>
         /// <returns></returns>
-        protected virtual bool CheckPathForExcursions()
+        protected virtual bool PathHasExcursions()
         {
             bool HasExcursions = false;
 
@@ -34,9 +35,9 @@ namespace Implementation
 
             foreach (var segment in PathSegments)
             {
-                string[] Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                List<string> Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 HasExcursions = HasExcursions || Positions.ToList()
-                    .Where(x => Map.Nodes[x].ConnectedNodes.Count() > 2)
+                    .Where(x => Map.Nodes[x].ConnectedNodes.Where(y => Positions.Contains(y.Position.ToString())).Count() > 2)
                     .Any();
             }
 
@@ -51,9 +52,15 @@ namespace Implementation
             while (!Solved)
             {
                 this.Search();
-                Solved = !CheckPathForExcursions();
 
-                Map.RefreshNodeCollection();
+                if (PathHasExcursions())
+                {
+                    Map.RefreshNodeCollection();
+                }
+                else
+                {
+                    Solved = true;
+                }
             }
 
             return true;

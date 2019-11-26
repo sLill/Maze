@@ -81,11 +81,6 @@ namespace Implementation
 
             return base.Search();
         }
-
-        public override bool Solve()
-        {
-            return base.Solve();
-        }
         #endregion Methods..
     }
 }

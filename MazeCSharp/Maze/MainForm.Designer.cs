@@ -44,7 +44,7 @@
             // btnLoad
             // 
             this.btnLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLoad.Location = new System.Drawing.Point(290, 445);
+            this.btnLoad.Location = new System.Drawing.Point(335, 489);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(89, 23);
             this.btnLoad.TabIndex = 0;
@@ -73,7 +73,7 @@
             "Dijkstra",
             "FibonacciHeap",
             "LeftTurn"});
-            this.cmbAlgorithm.Location = new System.Drawing.Point(130, 445);
+            this.cmbAlgorithm.Location = new System.Drawing.Point(175, 489);
             this.cmbAlgorithm.Name = "cmbAlgorithm";
             this.cmbAlgorithm.Size = new System.Drawing.Size(152, 21);
             this.cmbAlgorithm.TabIndex = 2;
@@ -129,7 +129,7 @@
             this.cbOutputPath.AutoSize = true;
             this.cbOutputPath.Checked = true;
             this.cbOutputPath.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbOutputPath.Location = new System.Drawing.Point(130, 420);
+            this.cbOutputPath.Location = new System.Drawing.Point(175, 464);
             this.cbOutputPath.Name = "cbOutputPath";
             this.cbOutputPath.Size = new System.Drawing.Size(140, 17);
             this.cbOutputPath.TabIndex = 9;
@@ -144,7 +144,7 @@
             this.pbMaze.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.pbMaze.Location = new System.Drawing.Point(12, 102);
             this.pbMaze.Name = "pbMaze";
-            this.pbMaze.Size = new System.Drawing.Size(369, 269);
+            this.pbMaze.Size = new System.Drawing.Size(414, 313);
             this.pbMaze.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pbMaze.TabIndex = 10;
             this.pbMaze.TabStop = false;
@@ -154,7 +154,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(396, 479);
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(441, 523);
             this.Controls.Add(this.pbMaze);
             this.Controls.Add(this.cbOutputPath);
             this.Controls.Add(this.label2);

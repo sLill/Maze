@@ -76,7 +76,7 @@ namespace Common
                     {
                         int X = Convert.ToInt32(position.Split(',')[0]);
                         int Y = Convert.ToInt32(position.Split(',')[1]);
-                        ImageColors[Y][X] = Color.Red;
+                        ImageColors[X][Y] = Color.Red;
                     }
                 }
             }
@@ -153,7 +153,7 @@ namespace Common
 
                     Nodes[Position] = new MapNode()
                     {
-                        Position = new Point() { X = j, Y = i },
+                        Position = new Point() { X = i, Y = j },
                         NodeValue = ColorValue,
                         IsStartNode = IsStartNode,
                         IsEndNode = IsEndNode
@@ -214,28 +214,47 @@ namespace Common
 
         public void RefreshNodeCollection()
         {
+            ConcurrentDictionary<string, MapNode> UpdatedNodeCollection = new ConcurrentDictionary<string, MapNode>();
+
             MapNode StartNode = Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value;
             MapNode EndNode = Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
 
-            Nodes.Clear();
-
-            Nodes[StartNode.Position.ToString()] = StartNode;
-            Nodes[EndNode.Position.ToString()] = EndNode;
-
+            var TotalSegments = EndNode.GetPathSegments();
             foreach (var segment in EndNode.GetPathSegments())
             {
                 string[] Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var position in Positions)
                 {
-                    Nodes[position] = new MapNode()
+                    string pos = position.Trim('\0');
+
+                    MapNode Node = Nodes[pos];
+                    UpdatedNodeCollection[pos] = new MapNode()
                     {
-                        Position = Point.FromString(position),
-                        NodeValue = EndNode.NodeValue,
-                        IsStartNode = StartNode.Position.ToString() == position,
-                        IsEndNode = EndNode.Position.ToString() == position
+                        Position = Point.FromString(pos),
+                        NodeValue = 0,
+                        IsStartNode = Node.IsStartNode,
+                        IsEndNode = Node.IsEndNode,
+                        NorthNode = Node.NorthNode,
+                        SouthNode = Node.SouthNode,
+                        EastNode = Node.EastNode,
+                        WestNode = Node.WestNode
                     };
                 }
             }
+
+            Nodes = UpdatedNodeCollection;
+
+            //var TotalSegments = EndNode.GetPathSegments();
+            //foreach (var segment in TotalSegments)
+            //{
+            //    string[] Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            //    foreach (var position in Positions)
+            //    {
+            //        position = position.Trim('\0');
+            //        Nodes[position].NodeValue = 0;
+            //        Nodes[position].MemoryMappedFileManager = new MemoryMappedFileManager();
+            //    }
+            //}
         }
         #endregion Methods..
     }

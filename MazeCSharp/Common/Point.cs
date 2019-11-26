@@ -21,14 +21,14 @@ namespace Common
         {
             return new Point()
             {
-                X = Convert.ToInt32(pointString.Split(',')[1]),
-                Y = Convert.ToInt32(pointString.Split(',')[0])
+                X = Convert.ToInt32(pointString.Split(',')[0]),
+                Y = Convert.ToInt32(pointString.Split(',')[1])
             };
         }
 
         public override string ToString()
         {
-            return $"{Y},{X}";
+            return $"{X},{Y}";
         }
         #endregion Methods..
     }
