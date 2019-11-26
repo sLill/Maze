@@ -19,9 +19,9 @@ namespace Implementation
         public BreadthFirst(Map map)
             : base(map) { }
         #endregion Constructors..
-        protected override bool PathHasExcursions()
+        protected override bool RemoveExcursions()
         {
-            return base.PathHasExcursions();
+            return base.RemoveExcursions();
         }
 
         protected override bool Search()
@@ -65,7 +65,7 @@ namespace Implementation
                 }
                 else
                 {
-                    if (CurrentNode.NorthNode != null && CurrentNode.NorthNode != CurrentNode && CurrentNode.NorthNode.NodeValue == 0)
+                    if (CurrentNode.NorthNode != null && CurrentNode.NorthNode.NodeValue == 0)
                     {
                         CurrentNode.NorthNode.Path = CurrentNode.Path;
                         CurrentNode.NorthNode.NodeValue = 1;
@@ -73,7 +73,7 @@ namespace Implementation
                         CurrentNode.NorthNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
                         NodeQueue.Enqueue(CurrentNode.NorthNode);
                     }
-                    if (CurrentNode.EastNode != null && CurrentNode.EastNode != CurrentNode && CurrentNode.EastNode.NodeValue == 0)
+                    if (CurrentNode.EastNode != null && CurrentNode.EastNode.NodeValue == 0)
                     {
                         CurrentNode.EastNode.Path = CurrentNode.Path;
                         CurrentNode.EastNode.NodeValue = 1;
@@ -81,7 +81,7 @@ namespace Implementation
                         CurrentNode.EastNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
                         NodeQueue.Enqueue(CurrentNode.EastNode);
                     }
-                    if (CurrentNode.SouthNode != null && CurrentNode.SouthNode != CurrentNode && CurrentNode.SouthNode.NodeValue == 0)
+                    if (CurrentNode.SouthNode != null && CurrentNode.SouthNode.NodeValue == 0)
                     {
                         CurrentNode.SouthNode.Path = CurrentNode.Path;
                         CurrentNode.SouthNode.NodeValue = 1;
@@ -89,7 +89,7 @@ namespace Implementation
                         CurrentNode.SouthNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
                         NodeQueue.Enqueue(CurrentNode.SouthNode);
                     }
-                    if (CurrentNode.WestNode != null && CurrentNode.WestNode != CurrentNode && CurrentNode.WestNode.NodeValue == 0)
+                    if (CurrentNode.WestNode != null && CurrentNode.WestNode.NodeValue == 0)
                     {
                         CurrentNode.WestNode.Path = CurrentNode.Path;
                         CurrentNode.WestNode.NodeValue = 1;

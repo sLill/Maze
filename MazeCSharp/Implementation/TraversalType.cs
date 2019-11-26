@@ -26,20 +26,11 @@ namespace Implementation
         /// Returns true if the solution path contains any nodes with more than two connections
         /// </summary>
         /// <returns></returns>
-        protected virtual bool PathHasExcursions()
+        protected virtual bool RemoveExcursions()
         {
-            bool HasExcursions = false;
+            bool HasExcursions = true;
 
-            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-            var PathSegments = EndNode.GetPathSegments();
-
-            foreach (var segment in PathSegments)
-            {
-                List<string> Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                HasExcursions = HasExcursions || Positions.ToList()
-                    .Where(x => Map.Nodes[x].ConnectedNodes.Where(y => Positions.Contains(y.Position.ToString())).Count() > 2)
-                    .Any();
-            }
+            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;         
 
             return HasExcursions;
         }
@@ -53,11 +44,7 @@ namespace Implementation
             {
                 this.Search();
 
-                if (PathHasExcursions())
-                {
-                    Map.RefreshNodeCollection();
-                }
-                else
+                if (RemoveExcursions())
                 {
                     Solved = true;
                 }
