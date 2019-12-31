@@ -1,7 +1,6 @@
 ﻿using Common;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace Implementation
@@ -29,30 +28,63 @@ namespace Implementation
         /// <returns></returns>
         protected virtual bool RemoveExcursions()
         {
-            bool HasExcursions = true;
+            bool Result = false;
+            int NodeCount = Map.Nodes.Count;
 
             MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-            List<string> PathFull = string.Join(string.Empty, EndNode.GetPathSegments()).Split(':').ToList();
+            List<string> PathSegments = EndNode.GetPathSegments();
 
-            for (int i = 0; i < Map.ImageColors.Length; i++)
+            if (PathSegments.Count > 1)
             {
-                Color[] colorRow = Map.ImageColors[i];
-                for (int j = 0; j < colorRow.Length; j++)
+                Map SanitizedMap = new Map();
+
+                // Start with the last segment (index 0) and work backwards
+                List<string> FullPath = string.Join(string.Empty, PathSegments).Split(':').ToList();
+                FullPath.RemoveAll(x => x == string.Empty);
+
+                // Build localized map
+                for (int i = 0; i < FullPath.Count; i++)
                 {
-                    if (!PathFull.Contains($"{i},{j}"))
+                    MapNode Node = null;
+                    if (SanitizedMap.Nodes.ContainsKey(FullPath[i]))
                     {
-                        Map.ImageColors[i][j] = Color.FromArgb(255, 255, 255);
+                        Node = SanitizedMap.Nodes[FullPath[i]];
                     }
                     else
                     {
-                        Map.ImageColors[i][j] = Color.FromArgb(0, 0, 0);
+                        Node = new MapNode()
+                        {
+                            Position = new Point() { X = Convert.ToInt32(FullPath[i].Split(',')[0]), Y = Convert.ToInt32(FullPath[i].Split(',')[1]) },
+                            NodeValue = 0
+                        };
+
+                        SanitizedMap.Nodes[FullPath[i]] = Node;
                     }
                 }
+
+                // Find/Set neighbors
+                SanitizedMap.Nodes.ToList().AsParallel().ForAll(pivotNode =>
+                {
+                    var PivotNeighbors = SanitizedMap.Nodes.Where(x => (x.Value.Position - pivotNode.Value.Position) == 1).Select(x => x.Value).ToList();
+
+                    pivotNode.Value.EastNode = PivotNeighbors.Where(x => x.Position.Y > pivotNode.Value.Position.Y).FirstOrDefault();
+                    pivotNode.Value.WestNode = PivotNeighbors.Where(x => x.Position.Y < pivotNode.Value.Position.Y).FirstOrDefault();
+                    pivotNode.Value.NorthNode = PivotNeighbors.Where(x => x.Position.X < pivotNode.Value.Position.X).FirstOrDefault();
+                    pivotNode.Value.SouthNode = PivotNeighbors.Where(x => x.Position.X > pivotNode.Value.Position.X).FirstOrDefault();
+                });
+
+                // Find Start/End Nodes 
+                string StartNodePosition = Map.Nodes.Where(x => x.Value.IsStartNode).Select(x => x.Value.Position.ToString()).FirstOrDefault();
+                string EndNodePosition = Map.Nodes.Where(x => x.Value.IsEndNode).Select(x => x.Value.Position.ToString()).FirstOrDefault();
+
+                SanitizedMap.Nodes[StartNodePosition].IsStartNode = true;
+                SanitizedMap.Nodes[EndNodePosition].IsEndNode = true;
+
+                Map = SanitizedMap;
             }
 
-            Map.InitializeNodes();
-
-            return HasExcursions;
+            Result = Map.Nodes.Count == NodeCount;
+            return !Result;
         }
 
         protected virtual bool Search() { return true; }
@@ -64,10 +96,9 @@ namespace Implementation
             {
                 this.Search();
 
-                if (RemoveExcursions())
-                {
-                    Solved = true;
-                }
+                // Very large mazes cache their pathing in memory in unfinished segments. When this happens, it
+                // becomes necessary to work backwards again through the solution
+                Solved = !RemoveExcursions();
             }
 
             return true;

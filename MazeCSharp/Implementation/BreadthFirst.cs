@@ -19,11 +19,8 @@ namespace Implementation
         public BreadthFirst(Map map)
             : base(map) { }
         #endregion Constructors..
-        protected override bool RemoveExcursions()
-        {
-            return base.RemoveExcursions();
-        }
 
+        #region Methods..
         protected override bool Search()
         {
             //           Breadth - First - Search(Maze m)
@@ -105,7 +102,6 @@ namespace Implementation
             return base.Search();
         }
 
-        #region Methods..
         #endregion Methods..
     }
 }

@@ -28,6 +28,11 @@ namespace Common
         #endregion Properties..
 
         #region Constructors..
+        public Map()
+        {
+            Nodes = new ConcurrentDictionary<string, MapNode>();
+        }
+
         public Map(Bitmap mazeImage)
         {
             Image = mazeImage;
