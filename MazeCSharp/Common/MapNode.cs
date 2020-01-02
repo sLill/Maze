@@ -51,7 +51,7 @@ namespace Common
         #region Methods..
         public void AppendPointToPath()
         {
-            // 50 Mb files
+            // 5 Kb files
             if (Path.Length >= 50000)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();

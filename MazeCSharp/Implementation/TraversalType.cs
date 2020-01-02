@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Implementation
 {
@@ -22,6 +23,18 @@ namespace Implementation
         #endregion Constructors..
 
         #region Methods..
+        private void MarkDeadEnd(MapNode node)
+        {
+            node.NodeValue = -1;
+            node.ConnectedNodes.ForEach(connectedNode =>
+            {
+                if (connectedNode.ConnectedNodes.Count() < 3)
+                {
+                    MarkDeadEnd(connectedNode);
+                }
+            });
+        }
+
         /// <summary>
         /// Returns true if the solution path contains any nodes with more than two connections
         /// </summary>
@@ -31,7 +44,9 @@ namespace Implementation
             bool Result = false;
             int NodeCount = Map.Nodes.Count;
 
+            MapNode StartNode = Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value;
             MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+
             List<string> PathSegments = EndNode.GetPathSegments();
 
             if (PathSegments.Count > 1)
@@ -63,7 +78,7 @@ namespace Implementation
                 }
 
                 // Find/Set neighbors
-                SanitizedMap.Nodes.ToList().AsParallel().ForAll(pivotNode =>
+                Parallel.ForEach(SanitizedMap.Nodes.ToList(), pivotNode =>
                 {
                     var PivotNeighbors = SanitizedMap.Nodes.Where(x => (x.Value.Position - pivotNode.Value.Position) == 1).Select(x => x.Value).ToList();
 
@@ -73,13 +88,18 @@ namespace Implementation
                     pivotNode.Value.SouthNode = PivotNeighbors.Where(x => x.Position.X > pivotNode.Value.Position.X).FirstOrDefault();
                 });
 
-                // Find Start/End Nodes 
-                string StartNodePosition = Map.Nodes.Where(x => x.Value.IsStartNode).Select(x => x.Value.Position.ToString()).FirstOrDefault();
-                string EndNodePosition = Map.Nodes.Where(x => x.Value.IsEndNode).Select(x => x.Value.Position.ToString()).FirstOrDefault();
+                // Set Start/End Nodes 
+                SanitizedMap.Nodes[StartNode.Position.ToString()].IsStartNode = true;
+                SanitizedMap.Nodes[EndNode.Position.ToString()].IsEndNode = true;
 
-                SanitizedMap.Nodes[StartNodePosition].IsStartNode = true;
-                SanitizedMap.Nodes[EndNodePosition].IsEndNode = true;
+                // Find all dead end nodes and remove their paths
+                var DeadEndNodes = new Stack<MapNode>(SanitizedMap.Nodes.Where(x => x.Value.ConnectedNodes.Count == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Select(x => x.Value));
+                while (DeadEndNodes.Count() > 0)
+                {
+                    MarkDeadEnd(DeadEndNodes.Pop());
+                }
 
+                Map = null;
                 Map = SanitizedMap;
             }
 
@@ -96,11 +116,12 @@ namespace Implementation
             {
                 this.Search();
 
-                // Very large mazes cache their pathing in memory in unfinished segments. When this happens, it
-                // becomes necessary to work backwards again through the solution
+                // Very large mazes cache their pathing in memory as unfinished segments using MemoryMappedFiles. When this happens, it
+                // becomes necessary to work backwards again through the solution again
                 Solved = !RemoveExcursions();
             }
 
+            this.Search();
             return true;
         }
         #endregion Methods..
