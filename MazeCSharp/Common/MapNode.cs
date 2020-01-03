@@ -5,14 +5,17 @@ namespace Common
 {
     public class MapNode : IDisposable
     {
+        #region Member Variables..
+        #endregion Member Variables..
+
         #region Properties..
-        public MapNode NorthNode { get; set; }
+        public string NorthNode { get; set; }
 
-        public MapNode EastNode { get; set; }
+        public string EastNode { get; set; }
 
-        public MapNode SouthNode { get; set; }
+        public string SouthNode { get; set; }
 
-        public MapNode WestNode { get; set; }
+        public string WestNode { get; set; }
 
         public Point Position { get; set; }
 
@@ -20,21 +23,21 @@ namespace Common
 
         public bool IsStartNode { get; set; }
 
+        public List<string> PathSegments { get; set; }
+
         public MemoryMappedFileManager MemoryMappedFileManager { get; set; }
 
         // -1 = Wall, 0 = Path (unvisited), 1 = Path (visited), 2 = Path (visited and examined)
         public int NodeValue { get; set; }
 
-        public List<MapNode> ConnectedNodes
+        public int ConnectedNodes
         {
             get
             {
-                List<MapNode> Connections = new List<MapNode>();
-                if (NorthNode != null) Connections.Add(NorthNode);
-                if (EastNode != null) Connections.Add(EastNode);
-                if (SouthNode != null) Connections.Add(SouthNode);
-                if (WestNode != null) Connections.Add(WestNode);
-                return Connections;
+                return (NorthNode == null ? 0 : 1) +
+                       (EastNode == null ? 0 : 1) +
+                       (SouthNode == null ? 0 : 1) +
+                       (WestNode == null ? 0 : 1);
             }
         }
 
@@ -45,6 +48,7 @@ namespace Common
         public MapNode()
         {
             Path = string.Empty;
+            PathSegments = new List<string>();
         }
         #endregion Constructors..
 
@@ -52,7 +56,8 @@ namespace Common
         public void AppendPointToPath()
         {
             // 5 Kb files
-            if (Path.Length >= 50000)
+            //if (Path.Length >= 50000)
+            if (Path.Length >= 1000)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path);
@@ -65,6 +70,8 @@ namespace Common
         public void Dispose()
         {
             Path = string.Empty;
+            MemoryMappedFileManager = null;
+            PathSegments = null;
         }
 
         /// <summary>
@@ -74,19 +81,17 @@ namespace Common
         /// <returns></returns>
         public List<string> GetPathSegments()
         {
-            List<string> Result = new List<string>();
-
             if (Path != string.Empty)
             {
-                Result.Add(Path);
+                PathSegments.Add(Path);
             }
 
             if (MemoryMappedFileManager != null)
             {
-                Result.AddRange(MemoryMappedFileManager.GetFileContent());
+                PathSegments.AddRange(MemoryMappedFileManager.GetFileContent());
             }
 
-            return Result;
+            return PathSegments;
         }
         #endregion Methods..
     }

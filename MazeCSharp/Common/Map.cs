@@ -156,13 +156,16 @@ namespace Common
                     bool IsStartNode = i == 0 && ColorValue == 0;
                     bool IsEndNode = i == ImageColors.Length - 1 && ColorValue == 0;
 
-                    Nodes[Position] = new MapNode()
+                    if (ColorValue != -1)
                     {
-                        Position = new Point() { X = i, Y = j },
-                        NodeValue = ColorValue,
-                        IsStartNode = IsStartNode,
-                        IsEndNode = IsEndNode
-                    };
+                        Nodes[Position] = new MapNode()
+                        {
+                            Position = new Point() { X = i, Y = j },
+                            NodeValue = ColorValue,
+                            IsStartNode = IsStartNode,
+                            IsEndNode = IsEndNode
+                        };
+                    }
                 }
             });
 
@@ -174,43 +177,46 @@ namespace Common
                     string Position = $"{i},{j}";
                     string NeighborPosition = string.Empty;
 
-                    // North
-                    if (i != 0)
+                    if (Nodes.ContainsKey(Position))
                     {
-                        NeighborPosition = $"{i - 1},{j}";
-                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        // North
+                        if (i != 0)
                         {
-                            Nodes[Position].NorthNode = Nodes[NeighborPosition];
+                            NeighborPosition = $"{i - 1},{j}";
+                            if (Nodes.ContainsKey(NeighborPosition) && Nodes[NeighborPosition].NodeValue == 0)
+                            {
+                                Nodes[Position].NorthNode = NeighborPosition;
+                            }
                         }
-                    }
 
-                    // West
-                    if (j != 0)
-                    {
-                        NeighborPosition = $"{i},{j - 1}";
-                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        // West
+                        if (j != 0)
                         {
-                            Nodes[Position].WestNode = Nodes[NeighborPosition];
+                            NeighborPosition = $"{i},{j - 1}";
+                            if (Nodes.ContainsKey(NeighborPosition) && Nodes[NeighborPosition].NodeValue == 0)
+                            {
+                                Nodes[Position].WestNode = NeighborPosition;
+                            }
                         }
-                    }
 
-                    // South
-                    if (i != ImageColors.Length - 1)
-                    {
-                        NeighborPosition = $"{i + 1},{j}";
-                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        // South
+                        if (i != ImageColors.Length - 1)
                         {
-                            Nodes[Position].SouthNode = Nodes[NeighborPosition];
+                            NeighborPosition = $"{i + 1},{j}";
+                            if (Nodes.ContainsKey(NeighborPosition) && Nodes[NeighborPosition].NodeValue == 0)
+                            {
+                                Nodes[Position].SouthNode = NeighborPosition;
+                            }
                         }
-                    }
 
-                    // East
-                    if (j != ImageColors[i].Length - 1)
-                    {
-                        NeighborPosition = $"{i},{j + 1}";
-                        if (Nodes[NeighborPosition].NodeValue == 0)
+                        // East
+                        if (j != ImageColors[i].Length - 1)
                         {
-                            Nodes[Position].EastNode = Nodes[NeighborPosition];
+                            NeighborPosition = $"{i},{j + 1}";
+                            if (Nodes.ContainsKey(NeighborPosition) && Nodes[NeighborPosition].NodeValue == 0)
+                            {
+                                Nodes[Position].EastNode = NeighborPosition;
+                            }
                         }
                     }
                 }

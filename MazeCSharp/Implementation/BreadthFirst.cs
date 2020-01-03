@@ -62,40 +62,51 @@ namespace Implementation
                 }
                 else
                 {
-                    if (CurrentNode.NorthNode != null && CurrentNode.NorthNode.NodeValue == 0)
+                    string NorthNodePosition = CurrentNode.NorthNode;
+                    string EastNodePosition = CurrentNode.EastNode;
+                    string SouthNodePosition = CurrentNode.SouthNode;
+                    string WestNodePosition = CurrentNode.WestNode;
+
+                    try
                     {
-                        CurrentNode.NorthNode.Path = CurrentNode.Path;
-                        CurrentNode.NorthNode.NodeValue = 1;
+                        if (NorthNodePosition != null && Map.Nodes.ContainsKey(NorthNodePosition) && Map.Nodes[NorthNodePosition].NodeValue == 0)
+                        {
+                            Map.Nodes[NorthNodePosition].Path = CurrentNode.Path;
+                            Map.Nodes[NorthNodePosition].NodeValue = 1;
+                            Map.Nodes[NorthNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
 
-                        CurrentNode.NorthNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
-                        NodeQueue.Enqueue(CurrentNode.NorthNode);
+                            NodeQueue.Enqueue(Map.Nodes[NorthNodePosition]);
+                        }
+                        if (EastNodePosition != null && Map.Nodes.ContainsKey(EastNodePosition) && Map.Nodes[EastNodePosition].NodeValue == 0)
+                        {
+                            Map.Nodes[EastNodePosition].Path = CurrentNode.Path;
+                            Map.Nodes[EastNodePosition].NodeValue = 1;
+                            Map.Nodes[EastNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
+
+                            NodeQueue.Enqueue(Map.Nodes[EastNodePosition]);
+                        }
+                        if (SouthNodePosition != null && Map.Nodes.ContainsKey(SouthNodePosition) && Map.Nodes[SouthNodePosition].NodeValue == 0)
+                        {
+                            Map.Nodes[SouthNodePosition].Path = CurrentNode.Path;
+                            Map.Nodes[SouthNodePosition].NodeValue = 1;
+                            Map.Nodes[SouthNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
+
+                            NodeQueue.Enqueue(Map.Nodes[SouthNodePosition]);
+                        }
+                        if (WestNodePosition != null && Map.Nodes.ContainsKey(WestNodePosition) && Map.Nodes[WestNodePosition].NodeValue == 0)
+                        {
+                            Map.Nodes[WestNodePosition].Path = CurrentNode.Path;
+                            Map.Nodes[WestNodePosition].NodeValue = 1;
+                            Map.Nodes[WestNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
+
+                            NodeQueue.Enqueue(Map.Nodes[WestNodePosition]);
+                        }
+
+                        CurrentNode.Dispose();
+                        CurrentNode = null;
                     }
-                    if (CurrentNode.EastNode != null && CurrentNode.EastNode.NodeValue == 0)
-                    {
-                        CurrentNode.EastNode.Path = CurrentNode.Path;
-                        CurrentNode.EastNode.NodeValue = 1;
-
-                        CurrentNode.EastNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
-                        NodeQueue.Enqueue(CurrentNode.EastNode);
-                    }
-                    if (CurrentNode.SouthNode != null && CurrentNode.SouthNode.NodeValue == 0)
-                    {
-                        CurrentNode.SouthNode.Path = CurrentNode.Path;
-                        CurrentNode.SouthNode.NodeValue = 1;
-
-                        CurrentNode.SouthNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
-                        NodeQueue.Enqueue(CurrentNode.SouthNode);
-                    }
-                    if (CurrentNode.WestNode != null && CurrentNode.WestNode.NodeValue == 0)
-                    {
-                        CurrentNode.WestNode.Path = CurrentNode.Path;
-                        CurrentNode.WestNode.NodeValue = 1;
-
-                        CurrentNode.WestNode.MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
-                        NodeQueue.Enqueue(CurrentNode.WestNode);
-                    }
-
-                    CurrentNode.Dispose();
+                    catch (Exception ex)
+                    { }
                 }
             }
 
