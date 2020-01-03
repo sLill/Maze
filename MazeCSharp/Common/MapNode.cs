@@ -56,8 +56,7 @@ namespace Common
         public void AppendPointToPath()
         {
             // 5 Kb files
-            //if (Path.Length >= 50000)
-            if (Path.Length >= 1000)
+            if (Path.Length >= 50000)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path);

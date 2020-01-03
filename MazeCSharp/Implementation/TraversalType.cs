@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Implementation
@@ -26,28 +27,34 @@ namespace Implementation
         #region Methods..
         private void MarkDeadEnd(ConcurrentDictionary<string, MapNode> mapNodes, MapNode node)
         {
-            List<string> ConnectedNodes = new List<string>()
+            if (node.NorthNode != null)
             {
-                node.NorthNode,
-                node.EastNode,
-                node.SouthNode,
-                node.WestNode
-            };
+                mapNodes[node.NorthNode.ToString()].SouthNode = null;
+                MarkDeadEnd(mapNodes, mapNodes[node.NorthNode.ToString()]);
+            }
 
-            mapNodes.TryRemove(node.Position.ToString(), out MapNode removedNode);
-
-            node.Dispose();
-            node = null;
-
-            ConnectedNodes.RemoveAll(x => x == null);
-            ConnectedNodes.ForEach(connectedNode =>
+            if (node.SouthNode != null)
             {
-                if (mapNodes.ContainsKey(connectedNode) && mapNodes[connectedNode]?.ConnectedNodes < 3)
-                {
-                    MarkDeadEnd(mapNodes, mapNodes[connectedNode]);
-                }
-            });
+                mapNodes[node.SouthNode.ToString()].NorthNode = null;
+                MarkDeadEnd(mapNodes, mapNodes[node.SouthNode.ToString()]);
+            }
 
+            if (node.EastNode != null)
+            {
+                mapNodes[node.EastNode.ToString()].WestNode = null;
+                MarkDeadEnd(mapNodes, mapNodes[node.EastNode.ToString()]);
+            }
+
+            if (node.WestNode != null)
+            {
+                mapNodes[node.WestNode.ToString()].EastNode = null;       // OVerflows here
+                MarkDeadEnd(mapNodes, mapNodes[node.WestNode.ToString()]); 
+            }
+
+            if (mapNodes[node.Position.ToString()]?.ConnectedNodes < 2)
+            {
+                mapNodes.TryRemove(node.Position.ToString(), out MapNode m);
+            }
         }
 
         /// <summary>
@@ -69,7 +76,7 @@ namespace Implementation
                 var RevisedNodes = new ConcurrentDictionary<string, MapNode>();
 
                 // Start with the last segment (index 0) and work backwards
-                List<string> FullPath = string.Join(string.Empty, PathSegments).Split(':').ToList();
+                List<string> FullPath = string.Join(string.Empty, PathSegments).Replace("\0", string.Empty).Split(':').ToList();
                 FullPath.RemoveAll(x => x == string.Empty);
 
                 // Build localized map
@@ -118,7 +125,6 @@ namespace Implementation
                 // Set Start/End Nodes 
                 RevisedNodes[StartNode.Position.ToString()].IsStartNode = true;
                 RevisedNodes[EndNode.Position.ToString()].IsEndNode = true;
-                RevisedNodes[EndNode.Position.ToString()].PathSegments = EndNode.PathSegments;
 
                 // Find all dead end nodes and remove their paths
                 var DeadEndNodes = new Stack<MapNode>(RevisedNodes.Where(x => x.Value.ConnectedNodes == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Select(x => x.Value));
@@ -148,6 +154,7 @@ namespace Implementation
                 Solved = !RemoveExcursions();
             }
 
+            int c = Map.Nodes.Where(x => x.Value.ConnectedNodes == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Count();
             this.Search();
             return true;
         }
