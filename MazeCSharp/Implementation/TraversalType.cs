@@ -25,35 +25,35 @@ namespace Implementation
         #endregion Constructors..
 
         #region Methods..
-        private void MarkDeadEnd(ConcurrentDictionary<string, MapNode> mapNodes, MapNode node)
+        private void MarkDeadEnd(ConcurrentDictionary<string, MapNode> mapNodes, Point nodePosition)
         {
-            if (node.NorthNode != null)
+            MapNode Node = null;
+            if (mapNodes.ContainsKey(nodePosition.ToString()) && mapNodes[nodePosition.ToString()].ConnectedNodes < 2)
             {
-                mapNodes[node.NorthNode.ToString()].SouthNode = null;
-                MarkDeadEnd(mapNodes, mapNodes[node.NorthNode.ToString()]);
+                mapNodes.TryRemove(nodePosition.ToString(), out Node);
             }
 
-            if (node.SouthNode != null)
+            if (Node != null)
             {
-                mapNodes[node.SouthNode.ToString()].NorthNode = null;
-                MarkDeadEnd(mapNodes, mapNodes[node.SouthNode.ToString()]);
-            }
+                if (Node.NorthNode != null)
+                {
+                    MarkDeadEnd(mapNodes, Node.Position);
+                }
 
-            if (node.EastNode != null)
-            {
-                mapNodes[node.EastNode.ToString()].WestNode = null;
-                MarkDeadEnd(mapNodes, mapNodes[node.EastNode.ToString()]);
-            }
+                if (Node.SouthNode != null)
+                {
+                    MarkDeadEnd(mapNodes, Node.Position);
+                }
 
-            if (node.WestNode != null)
-            {
-                mapNodes[node.WestNode.ToString()].EastNode = null;       // OVerflows here
-                MarkDeadEnd(mapNodes, mapNodes[node.WestNode.ToString()]); 
-            }
+                if (Node.EastNode != null)
+                {
+                    MarkDeadEnd(mapNodes, Node.Position);
+                }
 
-            if (mapNodes[node.Position.ToString()]?.ConnectedNodes < 2)
-            {
-                mapNodes.TryRemove(node.Position.ToString(), out MapNode m);
+                if (Node.WestNode != null)
+                {
+                    MarkDeadEnd(mapNodes, Node.Position);
+                }
             }
         }
 
@@ -108,18 +108,6 @@ namespace Implementation
                     pivotNode.Value.WestNode = PivotNeighbors.Where(x => x.Position.Y < pivotNode.Value.Position.Y).FirstOrDefault()?.Position.ToString();
                     pivotNode.Value.NorthNode = PivotNeighbors.Where(x => x.Position.X < pivotNode.Value.Position.X).FirstOrDefault()?.Position.ToString();
                     pivotNode.Value.SouthNode = PivotNeighbors.Where(x => x.Position.X > pivotNode.Value.Position.X).FirstOrDefault()?.Position.ToString();
-
-                    //Point PivotNodePostion = pivotNode.Value.Position;
-
-                    //string NorthNodeKey = $"{PivotNodePostion.X - 1},{PivotNodePostion.Y}";
-                    //string EastNodeKey = $"{PivotNodePostion.X},{PivotNodePostion.Y + 1}";
-                    //string SouthNodeKey = $"{PivotNodePostion.X + 1},{PivotNodePostion.Y}";
-                    //string WestNodeKey = $"{PivotNodePostion.X},{PivotNodePostion.Y - 1}";
-
-                    //pivotNode.Value.NorthNode = RevisedNodes.Keys.Contains(NorthNodeKey) ? RevisedNodes[NorthNodeKey] : null;
-                    //pivotNode.Value.EastNode = RevisedNodes.Keys.Contains(EastNodeKey) ? RevisedNodes[EastNodeKey] : null;
-                    //pivotNode.Value.SouthNode = RevisedNodes.Keys.Contains(SouthNodeKey) ? RevisedNodes[SouthNodeKey] : null;
-                    //pivotNode.Value.WestNode = RevisedNodes.Keys.Contains(WestNodeKey) ? RevisedNodes[WestNodeKey] : null;
                 });
 
                 // Set Start/End Nodes 
@@ -130,7 +118,7 @@ namespace Implementation
                 var DeadEndNodes = new Stack<MapNode>(RevisedNodes.Where(x => x.Value.ConnectedNodes == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Select(x => x.Value));
                 while (DeadEndNodes.Count() > 0)
                 {
-                    MarkDeadEnd(RevisedNodes, DeadEndNodes.Pop());
+                    MarkDeadEnd(RevisedNodes, DeadEndNodes.Pop().Position);
                 }
 
                 Map.Nodes = RevisedNodes;

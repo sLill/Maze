@@ -57,6 +57,7 @@ namespace Common
         {
             // 5 Kb files
             if (Path.Length >= 50000)
+            //if (Path.Length >= 1000)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path);
