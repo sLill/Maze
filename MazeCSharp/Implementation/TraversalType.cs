@@ -25,12 +25,13 @@ namespace Implementation
         #endregion Constructors..
 
         #region Methods..
-        private void MarkDeadEnd(ConcurrentDictionary<string, MapNode> mapNodes, Point nodePosition)
+        private void MarkDeadEnd(ConcurrentDictionary<int, ConcurrentDictionary<int, MapNode>> mapNodes, Point nodePosition)
         {
             MapNode Node = null;
-            if (mapNodes.ContainsKey(nodePosition.ToString()) && mapNodes[nodePosition.ToString()].ConnectedNodes < 2)
+            if (mapNodes.ContainsKey(nodePosition.X) && mapNodes[nodePosition.X].ContainsKey(nodePosition.Y)
+                && mapNodes[nodePosition.X][nodePosition.Y].ConnectedNodes < 2)
             {
-                mapNodes.TryRemove(nodePosition.ToString(), out Node);
+                mapNodes[nodePosition.X].TryRemove(nodePosition.Y, out Node);
             }
 
             if (Node != null)
@@ -57,6 +58,7 @@ namespace Implementation
             }
         }
 
+
         /// <summary>
         /// Returns true if the solution path contains any nodes with more than two connections
         /// </summary>
@@ -64,67 +66,111 @@ namespace Implementation
         protected virtual bool RemoveExcursions()
         {
             bool Result = false;
-            int NodeCount = Map.Nodes.Count;
+            int NodeCount = Map.Nodes.Sum(x => x.Value.Count);
 
-            MapNode StartNode = Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value;
-            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-
-            List<string> PathSegments = EndNode.GetPathSegments();
+            List<string> PathSegments = Map.EndNode.GetPathSegments();
 
             if (PathSegments.Count > 1)
             {
-                var RevisedNodes = new ConcurrentDictionary<string, MapNode>();
+                var RevisedNodes = new ConcurrentDictionary<int, ConcurrentDictionary<int, MapNode>>();
 
-                // Start with the last segment (index 0) and work backwards
                 List<string> FullPath = string.Join(string.Empty, PathSegments).Replace("\0", string.Empty).Split(':').ToList();
                 FullPath.RemoveAll(x => x == string.Empty);
 
                 // Build localized map
                 for (int i = 0; i < FullPath.Count; i++)
                 {
+                    Point NodePosition = new Point(Convert.ToInt32(FullPath[i].Split(',')[0]), Convert.ToInt32(FullPath[i].Split(',')[1]));
+
                     MapNode Node = null;
-                    if (RevisedNodes.ContainsKey(FullPath[i]))
+                    if (RevisedNodes.ContainsKey(NodePosition.X) && RevisedNodes[NodePosition.X].ContainsKey(NodePosition.Y))
                     {
-                        Node = RevisedNodes[FullPath[i]];
+                        Node = RevisedNodes[NodePosition.X][NodePosition.Y];
                     }
                     else
                     {
                         Node = new MapNode()
                         {
-                            Position = new Point() { X = Convert.ToInt32(FullPath[i].Split(',')[0]), Y = Convert.ToInt32(FullPath[i].Split(',')[1]) },
+                            Position = NodePosition,
                             NodeValue = 0
                         };
 
-                        RevisedNodes[FullPath[i]] = Node;
+                        if (!RevisedNodes.ContainsKey(NodePosition.X))
+                        {
+                            RevisedNodes[NodePosition.X] = new ConcurrentDictionary<int, MapNode>();
+                        }
+
+                        RevisedNodes[NodePosition.X][NodePosition.Y] = Node;
                     }
                 }
 
-                // Find/Set neighbors
-                Parallel.ForEach(RevisedNodes.ToList(), pivotNode =>
+                // Build node relationships
+                foreach (var row in RevisedNodes)
                 {
-                    var PivotNeighbors = RevisedNodes.Where(x => (x.Value.Position - pivotNode.Value.Position) == 1).Select(x => x.Value).ToList();
+                    foreach (var column in RevisedNodes[row.Key])
+                    {
+                        Point NeighborPosition = null;
 
-                    pivotNode.Value.EastNode = PivotNeighbors.Where(x => x.Position.Y > pivotNode.Value.Position.Y).FirstOrDefault()?.Position.ToString();
-                    pivotNode.Value.WestNode = PivotNeighbors.Where(x => x.Position.Y < pivotNode.Value.Position.Y).FirstOrDefault()?.Position.ToString();
-                    pivotNode.Value.NorthNode = PivotNeighbors.Where(x => x.Position.X < pivotNode.Value.Position.X).FirstOrDefault()?.Position.ToString();
-                    pivotNode.Value.SouthNode = PivotNeighbors.Where(x => x.Position.X > pivotNode.Value.Position.X).FirstOrDefault()?.Position.ToString();
-                });
+                        // North
+                        if (row.Key != 0)
+                        {
+                            NeighborPosition = new Point(row.Key - 1, column.Key);
+                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
+                            {
+                                RevisedNodes[row.Key][column.Key].NorthNode = NeighborPosition;
+                            }
+                        }
 
-                // Set Start/End Nodes 
-                RevisedNodes[StartNode.Position.ToString()].IsStartNode = true;
-                RevisedNodes[EndNode.Position.ToString()].IsEndNode = true;
+                        // East
+                        if (column.Key != RevisedNodes[row.Key].Count - 1)
+                        {
+                            NeighborPosition = new Point(row.Key, column.Key + 1);
+                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
+                            {
+                                RevisedNodes[row.Key][column.Key].EastNode = NeighborPosition;
+                            }
+                        }
+
+                        // South
+                        if (row.Key != RevisedNodes[row.Key].Count - 1)
+                        {
+                            NeighborPosition = new Point(row.Key + 1, column.Key);
+                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
+                            {
+                                RevisedNodes[row.Key][column.Key].SouthNode = NeighborPosition;
+                            }
+                        }
+
+                        // West
+                        if (column.Key != 0)
+                        {
+                            NeighborPosition = new Point(row.Key, column.Key - 1);
+                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
+                            {
+                                RevisedNodes[row.Key][column.Key].WestNode = NeighborPosition;
+                            }
+                        }
+                    }
+                }
 
                 // Find all dead end nodes and remove their paths
-                var DeadEndNodes = new Stack<MapNode>(RevisedNodes.Where(x => x.Value.ConnectedNodes == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Select(x => x.Value));
-                while (DeadEndNodes.Count() > 0)
+                foreach (var row in RevisedNodes)
                 {
-                    MarkDeadEnd(RevisedNodes, DeadEndNodes.Pop().Position);
-                }
+                    var DeadEndNodes = new Stack<MapNode>(RevisedNodes[row.Key].Where(x => x.Value.ConnectedNodes == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Select(x => x.Value));
+                    while (DeadEndNodes.Count() > 0)
+                    {
+                        MarkDeadEnd(RevisedNodes, DeadEndNodes.Pop().Position);
+                    }
+                };
 
                 Map.Nodes = RevisedNodes;
             }
 
-            Result = Map.Nodes.Count == NodeCount;
+            Result = Map.Nodes.Sum(x => x.Value.Count) == NodeCount;
             return !Result;
         }
 
@@ -142,7 +188,6 @@ namespace Implementation
                 Solved = !RemoveExcursions();
             }
 
-            int c = Map.Nodes.Where(x => x.Value.ConnectedNodes == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Count();
             this.Search();
             return true;
         }

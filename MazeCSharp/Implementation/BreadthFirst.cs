@@ -40,75 +40,53 @@ namespace Implementation
             Queue<MapNode> NodeQueue = new Queue<MapNode>();
 
             // Start Node
-            NodeQueue.Enqueue(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
+            NodeQueue.Enqueue(Map.StartNode);
 
             // End Node
-            MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
-
             MapNode CurrentNode;
             while (NodeQueue.Count > 0)
             {
                 CurrentNode = NodeQueue.Dequeue();
-
                 CurrentNode.AppendPointToPath();
                 CurrentNode.NodeValue = 2;
 
                 // Push to preview buffer
                 Map.PreviewPixelBuffer.Push(CurrentNode.Position);
 
-                if (CurrentNode.Position == EndNode.Position)
+                if (CurrentNode.Position == Map.EndNode.Position)
                 {
                     return true;
                 }
                 else
                 {
-                    string NorthNodePosition = CurrentNode.NorthNode;
-                    string EastNodePosition = CurrentNode.EastNode;
-                    string SouthNodePosition = CurrentNode.SouthNode;
-                    string WestNodePosition = CurrentNode.WestNode;
-
-                    try
+                    List<Point> NeighborPositions = new List<Point>()
                     {
-                        if (NorthNodePosition != null && Map.Nodes.ContainsKey(NorthNodePosition) && Map.Nodes[NorthNodePosition].NodeValue == 0)
+                        CurrentNode.NorthNode,
+                        CurrentNode.EastNode,
+                        CurrentNode.SouthNode,
+                        CurrentNode.WestNode
+                    };
+
+                    NeighborPositions.RemoveAll(x => x == null);
+
+                    foreach (Point neighborPosition in NeighborPositions)
+                    {
+                        if (neighborPosition != null && Map.Nodes.ContainsKey(neighborPosition.X) && Map.Nodes[neighborPosition.X].ContainsKey(neighborPosition.Y)
+                            && Map.Nodes[neighborPosition.X][neighborPosition.Y].NodeValue == 0)
                         {
-                            Map.Nodes[NorthNodePosition].Path = CurrentNode.Path;
-                            Map.Nodes[NorthNodePosition].NodeValue = 1;
-                            Map.Nodes[NorthNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
+                            Map.Nodes[neighborPosition.X][neighborPosition.Y].Path = CurrentNode.Path;
+                            Map.Nodes[neighborPosition.X][neighborPosition.Y].NodeValue = 1;
+                            Map.Nodes[neighborPosition.X][neighborPosition.Y].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
 
-                            NodeQueue.Enqueue(Map.Nodes[NorthNodePosition]);
+                            NodeQueue.Enqueue(Map.Nodes[neighborPosition.X][neighborPosition.Y]);
                         }
-                        if (EastNodePosition != null && Map.Nodes.ContainsKey(EastNodePosition) && Map.Nodes[EastNodePosition].NodeValue == 0)
-                        {
-                            Map.Nodes[EastNodePosition].Path = CurrentNode.Path;
-                            Map.Nodes[EastNodePosition].NodeValue = 1;
-                            Map.Nodes[EastNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
-
-                            NodeQueue.Enqueue(Map.Nodes[EastNodePosition]);
-                        }
-                        if (SouthNodePosition != null && Map.Nodes.ContainsKey(SouthNodePosition) && Map.Nodes[SouthNodePosition].NodeValue == 0)
-                        {
-                            Map.Nodes[SouthNodePosition].Path = CurrentNode.Path;
-                            Map.Nodes[SouthNodePosition].NodeValue = 1;
-                            Map.Nodes[SouthNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
-
-                            NodeQueue.Enqueue(Map.Nodes[SouthNodePosition]);
-                        }
-                        if (WestNodePosition != null && Map.Nodes.ContainsKey(WestNodePosition) && Map.Nodes[WestNodePosition].NodeValue == 0)
-                        {
-                            Map.Nodes[WestNodePosition].Path = CurrentNode.Path;
-                            Map.Nodes[WestNodePosition].NodeValue = 1;
-                            Map.Nodes[WestNodePosition].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
-
-                            NodeQueue.Enqueue(Map.Nodes[WestNodePosition]);
-                        }
-
-                        CurrentNode.Dispose();
-                        CurrentNode = null;
                     }
-                    catch (Exception ex)
-                    { }
+
+                    CurrentNode.Dispose();
+                    CurrentNode = null;
                 }
             }
+
 
             return base.Search();
         }

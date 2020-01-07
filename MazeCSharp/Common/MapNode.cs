@@ -9,13 +9,13 @@ namespace Common
         #endregion Member Variables..
 
         #region Properties..
-        public string NorthNode { get; set; }
+        public Point NorthNode { get; set; }
 
-        public string EastNode { get; set; }
+        public Point EastNode { get; set; }
 
-        public string SouthNode { get; set; }
+        public Point SouthNode { get; set; }
 
-        public string WestNode { get; set; }
+        public Point WestNode { get; set; }
 
         public Point Position { get; set; }
 
@@ -56,8 +56,8 @@ namespace Common
         public void AppendPointToPath()
         {
             // 5 Kb files
-            if (Path.Length >= 50000)
-            //if (Path.Length >= 1000)
+            //if (Path.Length >= 50000)
+            if (Path.Length >= 10000)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path);

@@ -14,16 +14,17 @@ namespace Common
         #endregion Properties..
 
         #region Constructors..
+        public Point(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
         #endregion Constructors..
 
         #region Methods..
         public static Point FromString(string pointString)
         {
-            return new Point()
-            {
-                X = Convert.ToInt32(pointString.Split(',')[0]),
-                Y = Convert.ToInt32(pointString.Split(',')[1])
-            };
+            return new Point(Convert.ToInt32(pointString.Split(',')[0]), Convert.ToInt32(pointString.Split(',')[1]));
         }
 
         public override string ToString()

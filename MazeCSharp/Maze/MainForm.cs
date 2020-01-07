@@ -160,7 +160,7 @@ namespace Maze
                         break;
                     case Status.Solving:
                         StatusText = "Solving..";
-                        lblNodeCount.Text = _Map.Nodes.Count(x => x.Value.NodeValue == 0).ToString();
+                        lblNodeCount.Text = _Map.Nodes.Sum(x => x.Value.Count).ToString();
                         break;
                     case Status.Success:
                         StatusText = "Success";
