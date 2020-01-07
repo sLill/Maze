@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Common
 {
@@ -19,9 +20,9 @@ namespace Common
 
         public Point Position { get; set; }
 
-        public bool IsEndNode { get; set; }
-
         public bool IsStartNode { get; set; }
+
+        public bool IsEndNode { get; set; }
 
         public List<string> PathSegments { get; set; }
 
@@ -57,7 +58,7 @@ namespace Common
         {
             // 5 Kb files
             //if (Path.Length >= 50000)
-            if (Path.Length >= 10000)
+            if (Path.Length >= 100)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path);
@@ -81,14 +82,17 @@ namespace Common
         /// <returns></returns>
         public List<string> GetPathSegments()
         {
-            if (Path != string.Empty)
+            if (!PathSegments.Any())
             {
-                PathSegments.Add(Path);
-            }
+                if (Path != string.Empty)
+                {
+                    PathSegments.Add(Path);
+                }
 
-            if (MemoryMappedFileManager != null)
-            {
-                PathSegments.AddRange(MemoryMappedFileManager.GetFileContent());
+                if (MemoryMappedFileManager != null)
+                {
+                    PathSegments.AddRange(MemoryMappedFileManager.GetFileContent());
+                }
             }
 
             return PathSegments;

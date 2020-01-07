@@ -47,6 +47,8 @@ namespace Maze
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
+                    bool SolveResult = false;
+
                     SetStatus(Status.LoadingImage);
 
                     _FileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
@@ -68,7 +70,7 @@ namespace Maze
                         _MazeTimer.Elapsed += Timer_Elapsed;
 
                         SetStatus(Status.Solving);
-                        bool SolveResult = await SolveAsync(SelectedAlgorithm);
+                        SolveResult = await SolveAsync(SelectedAlgorithm);
 
                         _Map.DrawSolution(FloodFill);
 
@@ -86,7 +88,11 @@ namespace Maze
                     }
 
                     Timer_Elapsed(_MazeTimer, null);
-                    _Map.ExportSolution(_FileName, SelectedAlgorithm, _MazeTimer.ElapsedMilliseconds);
+
+                    if (SolveResult)
+                    {
+                        _Map.ExportSolution(_FileName, SelectedAlgorithm, _MazeTimer.ElapsedMilliseconds);
+                    }
                 }
             }
         }

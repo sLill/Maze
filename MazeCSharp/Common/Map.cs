@@ -27,9 +27,9 @@ namespace Common
 
         public ConcurrentStack<Point> PreviewPixelBuffer = new ConcurrentStack<Point>();
 
-        public MapNode StartNode { get; set; }
+        public MapNode StartNode { get { return Nodes.Values.Select(y => y.Where(x => x.Value.IsStartNode)).FirstOrDefault(x => x.Count() > 0).Select(y => y.Value).FirstOrDefault(); } }
 
-        public MapNode EndNode { get; set; }
+        public MapNode EndNode { get { return Nodes.Values.Select(y => y.Where(x => x.Value.IsEndNode)).FirstOrDefault(x => x.Count() > 0).Select(y => y.Value).FirstOrDefault(); } }
         #endregion Properties..
 
         #region Constructors..
@@ -172,12 +172,11 @@ namespace Common
                         {
                             Position = new Point(i, j),
                             NodeValue = 0,
+                            IsStartNode = IsStartNode,
+                            IsEndNode = IsEndNode
                         };
 
                         Nodes[i][j] = Node;
-
-                        StartNode = IsStartNode ? Node : StartNode;
-                        EndNode = IsEndNode ? Node : EndNode;
                     }
                 }
             }

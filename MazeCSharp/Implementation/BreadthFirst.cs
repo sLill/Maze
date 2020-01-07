@@ -43,6 +43,8 @@ namespace Implementation
             NodeQueue.Enqueue(Map.StartNode);
 
             // End Node
+
+
             MapNode CurrentNode;
             while (NodeQueue.Count > 0)
             {

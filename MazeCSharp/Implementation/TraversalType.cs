@@ -27,33 +27,17 @@ namespace Implementation
         #region Methods..
         private void MarkDeadEnd(ConcurrentDictionary<int, ConcurrentDictionary<int, MapNode>> mapNodes, Point nodePosition)
         {
-            MapNode Node = null;
-            if (mapNodes.ContainsKey(nodePosition.X) && mapNodes[nodePosition.X].ContainsKey(nodePosition.Y)
-                && mapNodes[nodePosition.X][nodePosition.Y].ConnectedNodes < 2)
+            if (nodePosition != null)
             {
-                mapNodes[nodePosition.X].TryRemove(nodePosition.Y, out Node);
-            }
-
-            if (Node != null)
-            {
-                if (Node.NorthNode != null)
+                if (mapNodes.ContainsKey(nodePosition.X) && mapNodes[nodePosition.X].ContainsKey(nodePosition.Y)
+                    && mapNodes[nodePosition.X][nodePosition.Y].ConnectedNodes < 3)
                 {
-                    MarkDeadEnd(mapNodes, Node.Position);
-                }
+                    mapNodes[nodePosition.X].TryRemove(nodePosition.Y, out MapNode Node);
 
-                if (Node.SouthNode != null)
-                {
-                    MarkDeadEnd(mapNodes, Node.Position);
-                }
-
-                if (Node.EastNode != null)
-                {
-                    MarkDeadEnd(mapNodes, Node.Position);
-                }
-
-                if (Node.WestNode != null)
-                {
-                    MarkDeadEnd(mapNodes, Node.Position);
+                    MarkDeadEnd(mapNodes, Node.NorthNode);
+                    MarkDeadEnd(mapNodes, Node.EastNode);
+                    MarkDeadEnd(mapNodes, Node.SouthNode);
+                    MarkDeadEnd(mapNodes, Node.WestNode);
                 }
             }
         }
@@ -92,7 +76,9 @@ namespace Implementation
                         Node = new MapNode()
                         {
                             Position = NodePosition,
-                            NodeValue = 0
+                            NodeValue = 0,
+                            IsStartNode = NodePosition.ToString() == Map.StartNode.Position.ToString(),
+                            IsEndNode = NodePosition.ToString() == Map.EndNode.Position.ToString()
                         };
 
                         if (!RevisedNodes.ContainsKey(NodePosition.X))
@@ -112,47 +98,35 @@ namespace Implementation
                         Point NeighborPosition = null;
 
                         // North
-                        if (row.Key != 0)
+                        NeighborPosition = new Point(row.Key - 1, column.Key);
+                        if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                            && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
                         {
-                            NeighborPosition = new Point(row.Key - 1, column.Key);
-                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                RevisedNodes[row.Key][column.Key].NorthNode = NeighborPosition;
-                            }
+                            RevisedNodes[row.Key][column.Key].NorthNode = NeighborPosition;
                         }
 
                         // East
-                        if (column.Key != RevisedNodes[row.Key].Count - 1)
+                        NeighborPosition = new Point(row.Key, column.Key + 1);
+                        if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                            && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
                         {
-                            NeighborPosition = new Point(row.Key, column.Key + 1);
-                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                RevisedNodes[row.Key][column.Key].EastNode = NeighborPosition;
-                            }
+                            RevisedNodes[row.Key][column.Key].EastNode = NeighborPosition;
                         }
 
                         // South
-                        if (row.Key != RevisedNodes[row.Key].Count - 1)
+                        NeighborPosition = new Point(row.Key + 1, column.Key);
+                        if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                            && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
                         {
-                            NeighborPosition = new Point(row.Key + 1, column.Key);
-                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                RevisedNodes[row.Key][column.Key].SouthNode = NeighborPosition;
-                            }
+                            RevisedNodes[row.Key][column.Key].SouthNode = NeighborPosition;
                         }
 
                         // West
-                        if (column.Key != 0)
+                        NeighborPosition = new Point(row.Key, column.Key - 1);
+                        if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
+                            && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
                         {
-                            NeighborPosition = new Point(row.Key, column.Key - 1);
-                            if (RevisedNodes.ContainsKey(NeighborPosition.X) && RevisedNodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && RevisedNodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                RevisedNodes[row.Key][column.Key].WestNode = NeighborPosition;
-                            }
+                            RevisedNodes[row.Key][column.Key].WestNode = NeighborPosition;
                         }
                     }
                 }
@@ -160,7 +134,10 @@ namespace Implementation
                 // Find all dead end nodes and remove their paths
                 foreach (var row in RevisedNodes)
                 {
-                    var DeadEndNodes = new Stack<MapNode>(RevisedNodes[row.Key].Where(x => x.Value.ConnectedNodes == 1 && !x.Value.IsStartNode && !x.Value.IsEndNode).Select(x => x.Value));
+                    var DeadEndNodes = new Stack<MapNode>(RevisedNodes[row.Key].Where(x => x.Value.ConnectedNodes == 1 
+                        && x.Value.Position.ToString() != Map.StartNode.Position.ToString() 
+                        && x.Value.Position.ToString() != Map.EndNode.Position.ToString()).Select(x => x.Value));
+
                     while (DeadEndNodes.Count() > 0)
                     {
                         MarkDeadEnd(RevisedNodes, DeadEndNodes.Pop().Position);
@@ -183,12 +160,11 @@ namespace Implementation
             {
                 this.Search();
 
-                // Very large mazes cache their pathing in memory as unfinished segments using MemoryMappedFiles. When this happens, it
-                // becomes necessary to work backwards again through the solution again
+                // Very large mazes cache their pathing in memory as unfinished segments using MemoryMappedFiles
+                // When this happens, the mze must be rebuilt from the fragmented solution and processed again
                 Solved = !RemoveExcursions();
             }
 
-            this.Search();
             return true;
         }
         #endregion Methods..
