@@ -31,16 +31,10 @@ namespace Common
         // -1 = Wall, 0 = Path (unvisited), 1 = Path (visited), 2 = Path (visited and examined)
         public int NodeValue { get; set; }
 
-        public int ConnectedNodes
-        {
-            get
-            {
-                return (NorthNode == null ? 0 : 1) +
+        public int ConnectedNodes => (NorthNode == null ? 0 : 1) +
                        (EastNode == null ? 0 : 1) +
                        (SouthNode == null ? 0 : 1) +
                        (WestNode == null ? 0 : 1);
-            }
-        }
 
         public StringBuilder Path { get; set; }
         #endregion Properties..

@@ -1,9 +1,7 @@
 ﻿using Common;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Implementation
@@ -62,10 +60,10 @@ namespace Implementation
                 RevisedMap.InitializeAsync().Wait();
 
                 // Find all dead end nodes and remove their paths
-                Parallel.ForEach(RevisedMap.Nodes, row => 
+                Parallel.ForEach(RevisedMap.Nodes, row =>
                 {
-                    var DeadEndNodes = new Stack<MapNode>(RevisedMap.Nodes[row.Key].Where(x => x.Value.ConnectedNodes == 1 
-                        && x.Value.Position.ToString() != Map.StartNodePosition.ToString() 
+                    var DeadEndNodes = new Stack<MapNode>(RevisedMap.Nodes[row.Key].Where(x => x.Value.ConnectedNodes == 1
+                        && x.Value.Position.ToString() != Map.StartNodePosition.ToString()
                         && x.Value.Position.ToString() != Map.EndNodePosition.ToString()).Select(x => x.Value));
 
                     while (DeadEndNodes.Count() > 0)

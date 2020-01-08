@@ -53,11 +53,5 @@
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ApplicationManager\ApplicationManager.csproj">
-      <Project>{c4286f5d-e2a4-4927-9eb4-e18fa78df7fd}</Project>
-      <Name>ApplicationManager</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

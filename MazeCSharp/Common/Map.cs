@@ -1,5 +1,4 @@
-﻿using ApplicationManager;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
@@ -185,7 +184,7 @@ namespace Common
             EndNodePosition = Nodes[Nodes.Count() - 1].Values.First().Position;
 
             // Build node relationships
-            Parallel.ForEach(openNodes, node => 
+            Parallel.ForEach(openNodes, node =>
             {
                 Point NeighborPosition = null;
 

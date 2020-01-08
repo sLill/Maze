@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO.MemoryMappedFiles;
-using System.Linq;
 using System.Text;
 
 namespace Common
@@ -28,7 +27,7 @@ namespace Common
         {
             Guid UniqueFileId = Guid.NewGuid();
             var MappedFile = MemoryMappedFile.CreateNew(UniqueFileId.ToString(), fileContent.Length * 2);
-            
+
             using (var viewAcessor = MappedFile.CreateViewStream())
             {
                 byte[] Bytes = Encoding.ASCII.GetBytes(fileContent);
