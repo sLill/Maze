@@ -69,10 +69,7 @@
             this.cmbAlgorithm.Items.AddRange(new object[] {
             "BreadthFirst",
             "DepthFirst",
-            "Astar",
-            "Dijkstra",
-            "FibonacciHeap",
-            "LeftTurn"});
+            "DeadEndFill"});
             this.cmbAlgorithm.Location = new System.Drawing.Point(175, 489);
             this.cmbAlgorithm.Name = "cmbAlgorithm";
             this.cmbAlgorithm.Size = new System.Drawing.Size(152, 21);

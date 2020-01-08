@@ -136,9 +136,8 @@ namespace Maze
                 case "DepthFirst":
                     TraversalType = new DepthFirst(_Map);
                     break;
-                case "Astar":
-                    break;
-                case "Djikstra":
+                case "DeadEndFill":
+                    TraversalType = new DeadEndFill(_Map);
                     break;
                 case "FibonacciHeap":
                     break;

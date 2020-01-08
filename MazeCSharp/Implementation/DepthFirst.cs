@@ -1,6 +1,7 @@
 ﻿using Common;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Implementation
 {
@@ -29,55 +30,60 @@ namespace Implementation
             ////          for all edges from v to w in G.adjacentEdges(v) do
             ////              S.push(w)
 
-            //Stack<MapNode> NodeStack = new Stack<MapNode>();
+            Stack<MapNode> NodeStack = new Stack<MapNode>();
 
-            //// Start node
-            //NodeStack.Push(Map.Nodes.Where(x => x.Value.IsStartNode).FirstOrDefault().Value);
+            // Start Node
+            NodeStack.Push(Map.Nodes[Map.StartNodePosition.X][Map.StartNodePosition.Y]);
 
-            //// End node
-            //MapNode EndNode = Map.Nodes.Where(x => x.Value.IsEndNode).FirstOrDefault().Value;
+            MapNode CurrentNode;
+            while (NodeStack.Count > 0)
+            {
+                CurrentNode = NodeStack.Pop();
+                CurrentNode.AppendPointToPath(CurrentNode.Position);
+                CurrentNode.NodeValue = 2;
 
-            //MapNode CurrentNode;
-            //while (NodeStack.Count > 0)
-            //{
-            //    CurrentNode = NodeStack.Pop();
-            //    CurrentNode.Path += ($":{CurrentNode.Position.X.ToString()},{CurrentNode.Position.Y.ToString()}");
-            //    CurrentNode.NodeValue = 2;
+                // Push to preview buffer
+                Map.PreviewPixelBuffer.Push(CurrentNode.Position);
 
-            //    if (CurrentNode.Position == EndNode.Position)
-            //    {
-            //        return true;
-            //    }
-            //    else
-            //    {
-            //        if (CurrentNode.NorthNode != null && CurrentNode.NorthNode.NodeValue == 0)
-            //        {
-            //            CurrentNode.NorthNode.Path = CurrentNode.Path;
-            //            CurrentNode.NorthNode.NodeValue = 1;
-            //            NodeStack.Push(CurrentNode.NorthNode);
-            //        }
-            //        if (CurrentNode.EastNode != null && CurrentNode.EastNode.NodeValue == 0)
-            //        {
-            //            CurrentNode.EastNode.Path = CurrentNode.Path;
-            //            CurrentNode.EastNode.NodeValue = 1;
-            //            NodeStack.Push(CurrentNode.EastNode);
-            //        }
-            //        if (CurrentNode.SouthNode != null && CurrentNode.SouthNode.NodeValue == 0)
-            //        {
-            //            CurrentNode.SouthNode.Path = CurrentNode.Path;
-            //            CurrentNode.SouthNode.NodeValue = 1;
-            //            NodeStack.Push(CurrentNode.SouthNode);
-            //        }
-            //        if (CurrentNode.WestNode != null && CurrentNode.WestNode.NodeValue == 0)
-            //        {
-            //            CurrentNode.WestNode.Path = CurrentNode.Path;
-            //            CurrentNode.WestNode.NodeValue = 1;
-            //            NodeStack.Push(CurrentNode.WestNode);
-            //        }
-            //    }
+                if (CurrentNode.Position == Map.EndNodePosition)
+                {
+                    return true;
+                }
+                else
+                {
+                    List<Point> NeighborPositions = new List<Point>()
+                    {
+                        CurrentNode.NorthNode,
+                        CurrentNode.EastNode,
+                        CurrentNode.SouthNode,
+                        CurrentNode.WestNode
+                    };
 
-            //    CurrentNode.Path = null;
-            //}
+                    NeighborPositions.RemoveAll(x => x == null);
+
+                    Stack<StringBuilder> PathCopies = new Stack<StringBuilder>();
+                    for (int i = 1; i < NeighborPositions.Count; i++)
+                    {
+                        PathCopies.Push(new StringBuilder(CurrentNode.Path.ToString()));
+                    }
+
+                    foreach (Point neighborPosition in NeighborPositions)
+                    {
+                        if (neighborPosition != null && Map.Nodes.ContainsKey(neighborPosition.X) && Map.Nodes[neighborPosition.X].ContainsKey(neighborPosition.Y)
+                            && Map.Nodes[neighborPosition.X][neighborPosition.Y].NodeValue == 0)
+                        {
+                            Map.Nodes[neighborPosition.X][neighborPosition.Y].Path = PathCopies.Any() ? PathCopies.Pop() : CurrentNode.Path;
+                            Map.Nodes[neighborPosition.X][neighborPosition.Y].NodeValue = 1;
+                            Map.Nodes[neighborPosition.X][neighborPosition.Y].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
+
+                            NodeStack.Push(Map.Nodes[neighborPosition.X][neighborPosition.Y]);
+                        }
+                    }
+
+                    CurrentNode.Dispose();
+                    CurrentNode = null;
+                }
+            }
 
             return base.Search();
         }

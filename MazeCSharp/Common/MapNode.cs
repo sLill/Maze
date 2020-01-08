@@ -53,18 +53,18 @@ namespace Common
         #endregion Constructors..
 
         #region Methods..
-        public void AppendPointToPath()
+        public void AppendPointToPath(Point point)
         {
             Path = Path ?? new StringBuilder();
 
-            if (Path.Length >= 2500)
+            if (Path.Length >= 1800)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path.ToString());
                 Path = new StringBuilder();
             }
 
-            Path.Append($":{this.Position.ToString()}");
+            Path.Append($":{point.ToString()}");
         }
 
         public void Dispose()

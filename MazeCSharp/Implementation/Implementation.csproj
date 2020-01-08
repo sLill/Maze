@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BreadthFirst.cs" />
+    <Compile Include="DeadEndFill.cs" />
     <Compile Include="DepthFirst.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TraversalType.cs" />

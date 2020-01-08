@@ -47,7 +47,7 @@ namespace Implementation
             while (NodeQueue.Count > 0)
             {
                 CurrentNode = NodeQueue.Dequeue();
-                CurrentNode.AppendPointToPath();
+                CurrentNode.AppendPointToPath(CurrentNode.Position);
                 CurrentNode.NodeValue = 2;
 
                 // Push to preview buffer

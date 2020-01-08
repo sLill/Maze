@@ -91,7 +91,7 @@ namespace Implementation
                 this.Search();
 
                 // Very large mazes cache their pathing in memory as unfinished segments using MemoryMappedFiles
-                // When this happens, the mze must be rebuilt from the fragmented solution and processed again
+                // When this happens, the maze must be rebuilt from the fragmented solution and processed again
                 Solved = !RemoveExcursions();
             }
 
