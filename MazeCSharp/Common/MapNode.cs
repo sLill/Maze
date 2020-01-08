@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Common
@@ -58,9 +57,7 @@ namespace Common
         {
             Path = Path ?? new StringBuilder();
 
-            // 5 Kb files
-            if (Path.Length >= 50000)
-            //if (Path.Length >= 1000)
+            if (Path.Length >= 2500)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
                 MemoryMappedFileManager.CreateNewMappedFile(this.Path.ToString());

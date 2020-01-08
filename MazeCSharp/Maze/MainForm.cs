@@ -93,6 +93,8 @@ namespace Maze
                     {
                         _Map.ExportSolution(_FileName, SelectedAlgorithm, _MazeTimer.ElapsedMilliseconds);
                     }
+
+                    _Map = null;
                 }
             }
         }

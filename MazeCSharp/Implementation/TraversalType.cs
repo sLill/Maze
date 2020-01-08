@@ -62,7 +62,7 @@ namespace Implementation
                 RevisedMap.InitializeAsync().Wait();
 
                 // Find all dead end nodes and remove their paths
-                foreach (var row in RevisedMap.Nodes)
+                Parallel.ForEach(RevisedMap.Nodes, row => 
                 {
                     var DeadEndNodes = new Stack<MapNode>(RevisedMap.Nodes[row.Key].Where(x => x.Value.ConnectedNodes == 1 
                         && x.Value.Position.ToString() != Map.StartNodePosition.ToString() 
@@ -72,7 +72,7 @@ namespace Implementation
                     {
                         RemoveDeadEnd(RevisedMap.Nodes, DeadEndNodes.Pop().Position);
                     }
-                };
+                });
 
                 Map.Nodes = RevisedMap.Nodes;
             }

@@ -7,7 +7,6 @@
         #endregion Properties..
 
         #region Methods..
-
         #endregion Methods..
     }
 }

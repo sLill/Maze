@@ -185,7 +185,7 @@ namespace Common
             EndNodePosition = Nodes[Nodes.Count() - 1].Values.First().Position;
 
             // Build node relationships
-            foreach (Point node in openNodes)
+            Parallel.ForEach(openNodes, node => 
             {
                 Point NeighborPosition = null;
 
@@ -216,7 +216,7 @@ namespace Common
                 {
                     Nodes[node.X][node.Y].WestNode = NeighborPosition;
                 }
-            }
+            });
         }
 
         public async Task InitializeAsync()
