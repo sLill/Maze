@@ -13,3 +13,10 @@ C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.csproj
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.csproj.CopyComplete
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.exe
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Release\Maze.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Debug\Maze.exe.config
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Debug\Maze.exe
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Debug\Maze.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Debug\Common.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Debug\Implementation.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Debug\Common.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\bin\Debug\Implementation.pdb

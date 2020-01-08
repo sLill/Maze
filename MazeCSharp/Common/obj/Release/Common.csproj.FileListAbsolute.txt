@@ -4,3 +4,6 @@ C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Release\Common.cs
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Release\Common.csproj.CoreCompileInputs.cache
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Release\Common.dll
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Release\Common.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\bin\Release\ApplicationManager.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\bin\Release\ApplicationManager.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Release\Common.csproj.CopyComplete

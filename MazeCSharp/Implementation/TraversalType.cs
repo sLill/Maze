@@ -42,7 +42,6 @@ namespace Implementation
             }
         }
 
-
         /// <summary>
         /// Returns true if the solution path contains any nodes with more than two connections
         /// </summary>
@@ -60,6 +59,7 @@ namespace Implementation
                 FullPath.RemoveAll(x => x == string.Empty);
 
                 Map RevisedMap = new Map(FullPath);
+                RevisedMap.InitializeAsync().Wait();
 
                 // Find all dead end nodes and remove their paths
                 foreach (var row in RevisedMap.Nodes)
@@ -95,6 +95,7 @@ namespace Implementation
                 Solved = !RemoveExcursions();
             }
 
+            this.Search();
             return true;
         }
         #endregion Methods..

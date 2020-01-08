@@ -1,0 +1,5 @@
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\ApplicationManager\bin\Release\ApplicationManager.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\ApplicationManager\bin\Release\ApplicationManager.pdb
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\ApplicationManager\obj\Release\ApplicationManager.csproj.CoreCompileInputs.cache
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\ApplicationManager\obj\Release\ApplicationManager.dll
+C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\ApplicationManager\obj\Release\ApplicationManager.pdb

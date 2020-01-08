@@ -62,13 +62,15 @@ namespace Maze
                         SetStatus(Status.Initializing);
 
                         _Map = new Map(new Bitmap(FilePath));
+
                         pbMaze.Image = new Bitmap(_Map.Image);
+                        await _Map.InitializeAsync();
 
                         _MazeTimer = ThreadSafeEventTimer.StartNew();
                         _MazeTimer.Elapsed += Timer_Elapsed;
 
                         SetStatus(Status.Solving);
-                        SolveResult = await SolveAsync(SelectedAlgorithm);
+                        SolveResult = await Task.Run(() => Solve(SelectedAlgorithm));
 
                         _Map.DrawSolution(FloodFill);
 
@@ -121,7 +123,7 @@ namespace Maze
             lblNodeCount.Text = "-";
         }
 
-        private async Task<bool> SolveAsync(string selectedAlgorithm)
+        private bool Solve(string selectedAlgorithm)
         {
             TraversalType TraversalType = null;
             switch (selectedAlgorithm)
@@ -144,7 +146,7 @@ namespace Maze
                     break;
             }
 
-            return await Task.Run(() => TraversalType.Solve());
+            return TraversalType.Solve();
         }
 
         private void SetStatus(Status status)

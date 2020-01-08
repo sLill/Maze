@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ApplicationManager;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,6 +14,7 @@ namespace Common
     public class Map
     {
         #region Member Variables..
+        private List<string> _SolutionPath = null;
         #endregion Member Variables..
 
         #region Properties..
@@ -36,18 +38,13 @@ namespace Common
         public Map(List<string> solutionPath)
         {
             Nodes = new ConcurrentDictionary<int, ConcurrentDictionary<int, MapNode>>();
-
-            List<Point> OpenNodes = solutionPath.Select(x => new Point(Convert.ToInt32(x.Split(',')[0]), Convert.ToInt32(x.Split(',')[1]))).ToList();
-            InitializeNodes(OpenNodes);
+            _SolutionPath = solutionPath;
         }
 
         public Map(Bitmap mazeImage)
         {
             Image = mazeImage;
             Nodes = new ConcurrentDictionary<int, ConcurrentDictionary<int, MapNode>>();
-
-            List<Point> OpenNodes = InitializeImageColors();
-            InitializeNodes(OpenNodes);
         }
         #endregion Constructors..
 
@@ -77,6 +74,7 @@ namespace Common
             var ImageBitmapData = ImageCopy.LockBits(new Rectangle(0, 0, ImageCopy.Width, ImageCopy.Height), ImageLockMode.ReadWrite, ImageCopy.PixelFormat);
             Marshal.Copy(RgbData, 0, ImageBitmapData.Scan0, RgbData.Length);
             ImageCopy.UnlockBits(ImageBitmapData);
+
             return ImageCopy;
         }
 
@@ -184,7 +182,7 @@ namespace Common
 
             // Set StartNode/EndNode
             StartNodePosition = Nodes[0].Values.First().Position;
-            EndNodePosition = Nodes[openNodes.Count - 1].Values.First().Position;
+            EndNodePosition = Nodes[Nodes.Count() - 1].Values.First().Position;
 
             // Build node relationships
             foreach (Point node in openNodes)
@@ -219,6 +217,21 @@ namespace Common
                     Nodes[node.X][node.Y].WestNode = NeighborPosition;
                 }
             }
+        }
+
+        public async Task InitializeAsync()
+        {
+            List<Point> OpenNodes = null;
+            if (_SolutionPath != null)
+            {
+                OpenNodes = await Task.Run(() => { return _SolutionPath.Select(x => new Point(Convert.ToInt32(x.Split(',')[0]), Convert.ToInt32(x.Split(',')[1]))).ToList(); }).ConfigureAwait(false);
+            }
+            else
+            {
+                OpenNodes = await Task.Run(() => { return InitializeImageColors(); });
+            }
+
+            await Task.Run(() => InitializeNodes(OpenNodes));
         }
         #endregion Methods..
     }
