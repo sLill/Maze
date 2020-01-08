@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Implementation
@@ -40,10 +41,7 @@ namespace Implementation
             Queue<MapNode> NodeQueue = new Queue<MapNode>();
 
             // Start Node
-            NodeQueue.Enqueue(Map.StartNode);
-
-            // End Node
-
+            NodeQueue.Enqueue(Map.Nodes[Map.StartNodePosition.X][Map.StartNodePosition.Y]);
 
             MapNode CurrentNode;
             while (NodeQueue.Count > 0)
@@ -55,7 +53,7 @@ namespace Implementation
                 // Push to preview buffer
                 Map.PreviewPixelBuffer.Push(CurrentNode.Position);
 
-                if (CurrentNode.Position == Map.EndNode.Position)
+                if (CurrentNode.Position == Map.EndNodePosition)
                 {
                     return true;
                 }
@@ -71,12 +69,18 @@ namespace Implementation
 
                     NeighborPositions.RemoveAll(x => x == null);
 
+                    Stack<StringBuilder> PathCopies = new Stack<StringBuilder>();
+                    for (int i = 1; i < NeighborPositions.Count; i++)
+                    {
+                        PathCopies.Push(new StringBuilder(CurrentNode.Path.ToString()));
+                    }
+
                     foreach (Point neighborPosition in NeighborPositions)
                     {
                         if (neighborPosition != null && Map.Nodes.ContainsKey(neighborPosition.X) && Map.Nodes[neighborPosition.X].ContainsKey(neighborPosition.Y)
                             && Map.Nodes[neighborPosition.X][neighborPosition.Y].NodeValue == 0)
                         {
-                            Map.Nodes[neighborPosition.X][neighborPosition.Y].Path = CurrentNode.Path;
+                            Map.Nodes[neighborPosition.X][neighborPosition.Y].Path = PathCopies.Any() ? PathCopies.Pop() : CurrentNode.Path;
                             Map.Nodes[neighborPosition.X][neighborPosition.Y].NodeValue = 1;
                             Map.Nodes[neighborPosition.X][neighborPosition.Y].MemoryMappedFileManager = CurrentNode.MemoryMappedFileManager;
 
@@ -88,7 +92,6 @@ namespace Implementation
                     CurrentNode = null;
                 }
             }
-
 
             return base.Search();
         }

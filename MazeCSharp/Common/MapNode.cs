@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Common
 {
@@ -42,13 +43,12 @@ namespace Common
             }
         }
 
-        public string Path { get; set; }
+        public StringBuilder Path { get; set; }
         #endregion Properties..
 
         #region Constructors..
         public MapNode()
         {
-            Path = string.Empty;
             PathSegments = new List<string>();
         }
         #endregion Constructors..
@@ -56,21 +56,22 @@ namespace Common
         #region Methods..
         public void AppendPointToPath()
         {
+            Path = Path ?? new StringBuilder();
+
             // 5 Kb files
-            //if (Path.Length >= 50000)
-            if (Path.Length >= 100)
+            if (Path.Length >= 50000)
             {
                 MemoryMappedFileManager = MemoryMappedFileManager ?? new MemoryMappedFileManager();
-                MemoryMappedFileManager.CreateNewMappedFile(this.Path);
-                Path = string.Empty;
+                MemoryMappedFileManager.CreateNewMappedFile(this.Path.ToString());
+                Path = new StringBuilder();
             }
 
-            Path += $":{this.Position.ToString()}";
+            Path.Append($":{this.Position.ToString()}");
         }
 
         public void Dispose()
         {
-            Path = string.Empty;
+            Path = null;
             MemoryMappedFileManager = null;
             PathSegments = null;
         }
@@ -82,17 +83,14 @@ namespace Common
         /// <returns></returns>
         public List<string> GetPathSegments()
         {
-            if (!PathSegments.Any())
+            if (Path != null)
             {
-                if (Path != string.Empty)
-                {
-                    PathSegments.Add(Path);
-                }
+                PathSegments.Add(Path.ToString());
+            }
 
-                if (MemoryMappedFileManager != null)
-                {
-                    PathSegments.AddRange(MemoryMappedFileManager.GetFileContent());
-                }
+            if (MemoryMappedFileManager != null)
+            {
+                PathSegments.AddRange(MemoryMappedFileManager.GetFileContent());
             }
 
             return PathSegments;

@@ -4,3 +4,8 @@ C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Debug\Common.cspr
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Debug\Common.dll
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Debug\Common.pdb
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Common\obj\Debug\Common.csprojAssemblyReference.cache
+C:\Code\Maze\MazeCSharp\Common\bin\Debug\Common.dll
+C:\Code\Maze\MazeCSharp\Common\bin\Debug\Common.pdb
+C:\Code\Maze\MazeCSharp\Common\obj\Debug\Common.csprojAssemblyReference.cache
+C:\Code\Maze\MazeCSharp\Common\obj\Debug\Common.dll
+C:\Code\Maze\MazeCSharp\Common\obj\Debug\Common.pdb

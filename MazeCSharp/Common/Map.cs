@@ -27,21 +27,27 @@ namespace Common
 
         public ConcurrentStack<Point> PreviewPixelBuffer = new ConcurrentStack<Point>();
 
-        public MapNode StartNode { get { return Nodes.Values.Select(y => y.Where(x => x.Value.IsStartNode)).FirstOrDefault(x => x.Count() > 0).Select(y => y.Value).FirstOrDefault(); } }
+        public Point StartNodePosition { get; private set; }
 
-        public MapNode EndNode { get { return Nodes.Values.Select(y => y.Where(x => x.Value.IsEndNode)).FirstOrDefault(x => x.Count() > 0).Select(y => y.Value).FirstOrDefault(); } }
+        public Point EndNodePosition { get; private set; }
         #endregion Properties..
 
         #region Constructors..
-        public Map()
+        public Map(List<string> solutionPath)
         {
             Nodes = new ConcurrentDictionary<int, ConcurrentDictionary<int, MapNode>>();
+
+            List<Point> OpenNodes = solutionPath.Select(x => new Point(Convert.ToInt32(x.Split(',')[0]), Convert.ToInt32(x.Split(',')[1]))).ToList();
+            InitializeNodes(OpenNodes);
         }
 
         public Map(Bitmap mazeImage)
         {
             Image = mazeImage;
             Nodes = new ConcurrentDictionary<int, ConcurrentDictionary<int, MapNode>>();
+
+            List<Point> OpenNodes = InitializeImageColors();
+            InitializeNodes(OpenNodes);
         }
         #endregion Constructors..
 
@@ -78,7 +84,7 @@ namespace Common
         {
             if (!floodFill)
             {
-                foreach (var segment in EndNode.GetPathSegments())
+                foreach (var segment in Nodes[EndNodePosition.X][EndNodePosition.Y].GetPathSegments())
                 {
                     string[] Positions = segment?.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string position in Positions)
@@ -128,8 +134,10 @@ namespace Common
             ImageBitmap.Save(SavePath);
         }
 
-        public void InitializeImageColors()
+        private List<Point> InitializeImageColors()
         {
+            List<Point> OpenNodes = new List<Point>();
+
             ImageColors = new Color[Image.Width][];
             PreviewImageColors = new Color[Image.Width][];
 
@@ -140,100 +148,75 @@ namespace Common
 
                 for (int j = 0; j < Image.Height; j++)
                 {
-                    ImageColors[i][j] = Image.GetPixel(j, i);
-                    PreviewImageColors[i][j] = Image.GetPixel(j, i);
+                    Color PixelColor = Image.GetPixel(j, i);
+
+                    ImageColors[i][j] = PixelColor;
+                    PreviewImageColors[i][j] = PixelColor;
+
+                    if (PixelColor.ToArgb() == Color.White.ToArgb())
+                    {
+                        OpenNodes.Add(new Point(i, j));
+                    }
                 }
             }
+
+            return OpenNodes;
         }
 
-        public void InitializeNodes()
+        private void InitializeNodes(List<Point> openNodes)
         {
             // Populate map
-            //Parallel.For(0, ImageColors.Length, (i) =>
-            for (int i = 0; i < ImageColors.Length; i++)
+            foreach (Point openNode in openNodes)
             {
-                for (int j = 0; j < ImageColors[i].Length; j++)
+                MapNode Node = new MapNode()
                 {
-                    string Position = $"{i},{j}";
+                    Position = openNode,
+                    NodeValue = 0,
+                };
 
-                    // 0 = White, -1 = Black
-                    int ColorValue = ImageColors[i][j] == Color.FromArgb(0, 0, 0) ? -1 : 0;
-                    if (ColorValue != -1)
-                    {
-                        bool IsStartNode = i == 0;
-                        bool IsEndNode = i == ImageColors.Length - 1;
-
-                        if (!Nodes.ContainsKey((int)i))
-                        {
-                            Nodes[i] = new ConcurrentDictionary<int, MapNode>();
-                        }
-
-                        MapNode Node = new MapNode()
-                        {
-                            Position = new Point(i, j),
-                            NodeValue = 0,
-                            IsStartNode = IsStartNode,
-                            IsEndNode = IsEndNode
-                        };
-
-                        Nodes[i][j] = Node;
-                    }
+                if (!Nodes.ContainsKey(openNode.X))
+                {
+                    Nodes[openNode.X] = new ConcurrentDictionary<int, MapNode>();
                 }
+
+                Nodes[openNode.X][openNode.Y] = Node;
             }
 
+            // Set StartNode/EndNode
+            StartNodePosition = Nodes[0].Values.First().Position;
+            EndNodePosition = Nodes[openNodes.Count - 1].Values.First().Position;
+
             // Build node relationships
-            //Parallel.For(0, ImageColors.Length, (i) =>
-            for (int i = 0; i < ImageColors.Length; i++)
+            foreach (Point node in openNodes)
             {
-                for (int j = 0; j < ImageColors[i].Length; j++)
+                Point NeighborPosition = null;
+
+                // North
+                NeighborPosition = new Point(node.X - 1, node.Y);
+                if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y))
                 {
-                    Point NeighborPosition = null;
-                    if (Nodes.ContainsKey(i) && Nodes[i].ContainsKey(j))
-                    {
-                        // North
-                        if (i != 0)
-                        {
-                            NeighborPosition = new Point(i - 1, j);
-                            if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && Nodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                Nodes[i][j].NorthNode = NeighborPosition;
-                            }
-                        }
+                    Nodes[node.X][node.Y].NorthNode = NeighborPosition;
+                }
 
-                        // East
-                        if (j != ImageColors[i].Length - 1)
-                        {
-                            NeighborPosition = new Point(i, j + 1);
-                            if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && Nodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                Nodes[i][j].EastNode = NeighborPosition;
-                            }
-                        }
+                // East
+                NeighborPosition = new Point(node.X, node.Y + 1);
+                if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y))
+                {
+                    Nodes[node.X][node.Y].EastNode = NeighborPosition;
+                }
 
-                        // South
-                        if (i != ImageColors.Length - 1)
-                        {
-                            NeighborPosition = new Point(i + 1, j);
-                            if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && Nodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                Nodes[i][j].SouthNode = NeighborPosition;
-                            }
-                        }
+                // South
+                NeighborPosition = new Point(node.X + 1, node.Y);
+                if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y))
+                {
+                    Nodes[node.X][node.Y].SouthNode = NeighborPosition;
+                }
 
-                        // West
-                        if (j != 0)
-                        {
-                            NeighborPosition = new Point(i, j - 1);
-                            if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y)
-                                && Nodes[NeighborPosition.X][NeighborPosition.Y].NodeValue == 0)
-                            {
-                                Nodes[i][j].WestNode = NeighborPosition;
-                            }
-                        }
-                    }
+                // West
+                NeighborPosition = new Point(node.X, node.Y - 1);
+                if (Nodes.ContainsKey(NeighborPosition.X) && Nodes[NeighborPosition.X].ContainsKey(NeighborPosition.Y))
+                {
+                    Nodes[node.X][node.Y].WestNode = NeighborPosition;
                 }
             }
         }

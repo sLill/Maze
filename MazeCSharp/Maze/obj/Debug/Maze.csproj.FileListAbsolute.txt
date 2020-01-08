@@ -33,3 +33,17 @@ C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Debug\Maze.csproj.C
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Debug\Maze.csproj.CopyComplete
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Debug\Maze.exe
 C:\Users\lills\Desktop\VS Solutions\Maze\MazeCSharp\Maze\obj\Debug\Maze.pdb
+C:\Code\Maze\MazeCSharp\Maze\bin\Debug\Maze.exe.config
+C:\Code\Maze\MazeCSharp\Maze\bin\Debug\Maze.exe
+C:\Code\Maze\MazeCSharp\Maze\bin\Debug\Maze.pdb
+C:\Code\Maze\MazeCSharp\Maze\bin\Debug\Common.dll
+C:\Code\Maze\MazeCSharp\Maze\bin\Debug\Implementation.dll
+C:\Code\Maze\MazeCSharp\Maze\bin\Debug\Common.pdb
+C:\Code\Maze\MazeCSharp\Maze\bin\Debug\Implementation.pdb
+C:\Code\Maze\MazeCSharp\Maze\obj\Debug\Maze.csprojAssemblyReference.cache
+C:\Code\Maze\MazeCSharp\Maze\obj\Debug\Maze.MainForm.resources
+C:\Code\Maze\MazeCSharp\Maze\obj\Debug\Maze.Properties.Resources.resources
+C:\Code\Maze\MazeCSharp\Maze\obj\Debug\Maze.csproj.GenerateResource.cache
+C:\Code\Maze\MazeCSharp\Maze\obj\Debug\Maze.csproj.CopyComplete
+C:\Code\Maze\MazeCSharp\Maze\obj\Debug\Maze.exe
+C:\Code\Maze\MazeCSharp\Maze\obj\Debug\Maze.pdb

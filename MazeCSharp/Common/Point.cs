@@ -36,6 +36,16 @@ namespace Common
         {
             return Math.Sqrt(Math.Pow((p1.X - p2.X), 2) + Math.Pow((p1.Y - p2.Y) , 2));
         }
+
+        public static bool operator== (Point p1, Point p2)
+        {
+            return p1?.X == p2?.X && p1?.Y == p2?.Y;
+        }
+
+        public static bool operator!=(Point p1, Point p2)
+        {
+            return !(p1?.X == p2?.X && p1?.Y == p2?.Y);
+        }
         #endregion Methods..
     }
 }

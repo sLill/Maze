@@ -60,11 +60,9 @@ namespace Maze
                     try
                     {
                         SetStatus(Status.Initializing);
+
                         _Map = new Map(new Bitmap(FilePath));
                         pbMaze.Image = new Bitmap(_Map.Image);
-
-                        await Task.Run(() => _Map.InitializeImageColors()).ConfigureAwait(false);
-                        await Task.Run(() => _Map.InitializeNodes()).ConfigureAwait(false);
 
                         _MazeTimer = ThreadSafeEventTimer.StartNew();
                         _MazeTimer.Elapsed += Timer_Elapsed;
